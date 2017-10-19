@@ -4,10 +4,11 @@
 import numpy as np
 from matplotlib import pyplot as plt
 
-class vortex():
+class vortex:
     # init constructor
     def __init__(self, name):
         self.name = name
+        self.parts = []
         
     # representation
     def __repr__(self):
