@@ -1,14 +1,20 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-"""
-Created on Tue Oct 17 23:03:01 2017
-
-@author: kubo
-"""
+#coding: utf-8
 
 import numpy as np
+from matplotlib import pyplot as plt
 
-a = np.sqrt(2)
+class vortex():
+    # init constructor
+    def __init__(self, name):
+        self.name = name
+        
+    # representation
+    def __repr__(self):
+        return 'Quantum_Vortex-{!r}'.format(self.name)
+    
+    
+        
 
-print(a)
-print(type(a))
+
+v1 = vortex('Kubo')
