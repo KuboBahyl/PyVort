@@ -1,15 +1,30 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
+import numpy as np
 class Vortex(object):
-    # init constructor
-    def __init__(self, name):
-        self.name = name
+    
+    """
+    Attributes:
+        temp: temperature of system
+        N: initial number of segments
+        segments: dics with positions
+    """
+    
+    def __init__(self, temp, positions):
+        self.temp = temp
+        self.N = len(positions)
+        self.segments = np.array([
+                {'position' : positions[i]} 
+                for i in range(self.N) 
+                ])
         
-    # representation
     def __repr__(self):
-        return 'Quantum-Vortex-{!r}'.format(self.name)
+        return 'Quantum Vortex object'
     
-    def __str__(self):
-        return 'Quantum vortex of type - %s' % (self.name)
-    
+        
+    def getPosition(self, index):
+        return self.segments[index]['position']
 
+    def getCoords(self, axis):
+        return [self.segments[i]['position'][axis] for i  in range(self.N)]
+            
