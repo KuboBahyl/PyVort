@@ -10,11 +10,12 @@ class Vortex(object):
         segments: dics with positions
     """
     
-    def __init__(self, temp, positions):
-        self.temp = temp
+    def __init__(self, positions):
         self.N = len(positions)
         self.segments = np.array([
-                {'position' : positions[i]} 
+                {'position' : positions[i],
+                 'forward' : i+1,
+                 'backward' : i-1} 
                 for i in range(self.N) 
                 ])
         

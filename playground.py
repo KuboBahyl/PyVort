@@ -6,10 +6,14 @@ Created on Mon Nov 20 09:35:46 2017
 @author: kubo
 """
 
+from vortices import Vortex
+
+import matplotlib as mpl
+import matplotlib.pyplot as plt
+from mpl_toolkits.mplot3d import Axes3D
+
 import numpy as np
 
-test = np.ones(10)
-pole = np.array( [{'pos' : i} for i in range(10)] )
+testPositions = np.array([[x, 2*x, 5] for x in range(10)])
 
-#for i in range(10):
-#    array[i]['a'] = test[i]
+testVortex = Vortex(testPositions)

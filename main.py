@@ -22,11 +22,11 @@ R0 = np.array([X0,Y0,Z0])
 phi = 2*np.pi/N
 
 ringPositions = np.array([ R0 + 
-                          np.array([0, radius*np.sin(i*phi), radius*np.cos(i*phi)]) 
+                          [0, radius*np.sin(i*phi), radius*np.cos(i*phi)] 
                           for i in range (N) 
                           ])
 
-Rvortex = Vortex(T, ringPositions)
+Rvortex = Vortex(ringPositions)
 
 mpl.rcParams['legend.fontsize'] = 10
 
