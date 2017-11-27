@@ -32,9 +32,9 @@ mpl.rcParams['legend.fontsize'] = 10
 
 fig = plt.figure()
 ax = fig.gca(projection='3d')
-ax.scatter(Rvortex.getCoords(0), 
-        Rvortex.getCoords(1), 
-        Rvortex.getCoords(2), 
+ax.scatter(Rvortex.getAxisCoords(0), 
+        Rvortex.getAxisCoords(1), 
+        Rvortex.getAxisCoords(2), 
         label='ring')
 ax.legend()
 

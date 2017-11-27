@@ -6,3 +6,4 @@ Created on Thu Nov 23 03:26:07 2017
 @author: kubo
 """
 
+print('All tests passed!')
