@@ -28,14 +28,16 @@ ringPositions = np.array([ R0 +
 
 Rvortex = Vortex(ringPositions)
 
+# need to 
+
 mpl.rcParams['legend.fontsize'] = 10
 
 fig = plt.figure()
 ax = fig.gca(projection='3d')
-ax.scatter(Rvortex.getAxisCoords(0), 
-        Rvortex.getAxisCoords(1), 
-        Rvortex.getAxisCoords(2), 
-        label='ring')
+ax.scatter(Rvortex.getAllAxisCoords(0), 
+           Rvortex.getAllAxisCoords(1), 
+           Rvortex.getAllAxisCoords(2), 
+           label='ring')
 ax.legend()
 
 plt.show()
