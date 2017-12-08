@@ -10,7 +10,6 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 ## VORTEX RING, T=0
-
 N=100
 
 radius = 1                #ring radius [A]
