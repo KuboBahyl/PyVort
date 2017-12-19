@@ -5,7 +5,7 @@ from vortices import Vortex
 
 import matplotlib as mpl
 import matplotlib.pyplot as plt
-#from mpl_toolkits.mplot3d import Axes3D
+from mpl_toolkits.mplot3d import Axes3D
 
 import numpy as np
 
@@ -31,7 +31,7 @@ Rvortex.segments[0]['backward'] = N - 1
 Rvortex.segments[N-1]['forward'] = 0
 
 # adding properties
-Rvortex.addDerivatives()
+Rvortex.addProperties()
 
 
 
@@ -47,3 +47,6 @@ ax.scatter(Rvortex.getAllAxisCoords(0),
 ax.legend()
 
 plt.show()
+
+## saving vortex state
+##

@@ -10,6 +10,16 @@ from vortices import Vortex
 
 import numpy as np
 
-testPositions = np.array([[x, 2*x, 5] for x in range(10)])
+testPositions = np.array([[x, x**2, 0] for x in range(10)])
+N = len(testPositions)
 
+# init
 testVortex = Vortex(testPositions)
+
+# fixing neigbours for testline
+testVortex.segments[0]['backward'] = None
+testVortex.segments[N-1]['forward'] = None
+
+# tests
+testVortex.addProperties()
+print(testVortex.segments)
