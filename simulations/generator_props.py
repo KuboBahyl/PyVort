@@ -40,7 +40,9 @@ def calc_derivative(segments, item, order=1, radius=2):
         
         coeffs = calc_FDcoeffs(dists, order)
         
-        derivative = coeffs.dot(neighCoords)
+        magnitude = coeffs.dot(neighCoords)
+        # normalization
+        derivative = magnitude / np.linalg.norm(magnitude)**order
         return derivative
     
 def calc_velocity_LIA(segments, item):
@@ -76,4 +78,4 @@ def add_properties(segments, v_s):
             item['curvature'] = None
             item['velocity_LIA'] = None
             
-    return segments
+    #return segments

@@ -1,24 +1,39 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-Straight line inputs: number of segments, positions of begin and enf of line
-Ring inputs: number of segments, center position, radius
-random inputs: number of segments
+Here are prepared 3 types of vortex shape. Each of them should be defined
+with following parameters and their ordering:
+
+- STRAIGHT LINE: 
+    shape='straight'
+    number of segments (int)
+    beginning point coords (list of length 3)
+    ending point coords (list of length 3)
+                 
+- RING: 
+    shape='ring'
+    number of segments (int)
+    ring center coords (list of length 3)
+    ring radius (float)
+
+
+- RANDOM: 
+    shape='random'
+    number of segments (int)
 """
 import random
 import numpy as np
 
-def generate_positions(shape, *args):
-    N = args[0]
+def generate_positions(shape, N, *args):
     if (shape == 'straight'):
-        begin, end = np.array(args[1]), np.array(args[2])
+        begin, end = np.array(args[0]), np.array(args[1])
         step = (end - begin) / N
-        positions = np.array([ step*i
+        positions = np.array([ i*step
                             for i in range(N+1)
                             ])
     
     if (shape == 'ring'):
-        center, radius = np.array(args[1]), args[2]
+        center, radius = np.array(args[0]), args[1]
         step = 2*np.pi/N
         positions = np.array([ center + [0, radius*np.sin(i*step), radius*np.cos(i*step)] 
                                for i in range (N)

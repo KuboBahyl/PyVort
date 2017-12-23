@@ -1,63 +1,90 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-Here is performed the main loop of simulation
-
-to clear all data, execute `%reset` in Ipython console
+Here is performed the main loop of simulation.
+To clear all data, execute `%reset` in ipython console
 """
-
 #%%
-import generator_positions as genpos
-import class_vortex as genvortex
-import generator_props as genprops
-import stepping
+###################
+###   IMPORTS   ###
+###################
 
+# Libraries
 import numpy as np
-import matplotlib as mpl
+from mpl_toolkits.mplot3d import Axes3D
 import matplotlib.pyplot as plt
 
-def genPositions(shape, *args):
-    positions = genpos.generate_positions(shape, *args)
-    return positions
-    
+# Objects, functions
+import generator_positions
+import class_vortex
+import generator_props
+import stepping
 
-def addProperties(segments, v_s):
-    genprops.add_properties(segments, v_s)
+# Basic operations init
+def createPositions(shape, pieces, *args):
+    return generator_positions.generate_positions(shape, pieces, *args)
+
+def createVortex(positions):
+    return class_vortex.Vortex(positions)
+
+def addProperties(segments, velocity_superfluid):
+    return generator_props.add_properties(segments, velocity_superfluid)
+
+def makeStep(segments, dt):
+    return stepping.update_coords(segments, dt)
+
 #%%
-## INITIAL POSITIONS INIT
+##################################
+###   SINGLE VORTEX CREATION   ###
+##################################
+
+# Initial position
 shape = 'ring'
-N = 100
+pieces = 100
 center = [0,0,0]
 radius = 0.001
 
-positions = genpos.generate_positions(shape, N, center, radius)
+positions = createPositions(shape, pieces, center, radius)
+
+# Vortex init
+vortex = createVortex(positions)
+
+# Fixing boundary neighbours
+vortex.segments[0]['backward'] = pieces - 1
+vortex.segments[pieces-1]['forward'] = 0
+
+# Adding properties - first and second derivation, velocities (superfluid)
+velocity_superfluid = np.zeros(3)
+addProperties(vortex.segments, velocity_superfluid)
+
 #%%
-## VORTEX CREATION
-vortex = genvortex.Vortex(positions)
+##########################
+###   TIME EVOLUTION   ###
+##########################
 
-# fixing neigbours
-vortex.segments[0]['backward'] = N - 1
-vortex.segments[N-1]['forward'] = 0
-
-# adding properties
-v_s = np.zeros(3)
-vortex.segments = genprops.add_properties(vortex.segments, v_s)
-
-#%%
-iters = 10
+# Time steps and steplength
+steps = 10
 dt=0.1
 
-mpl.rcParams['legend.fontsize'] = 10
+#mpl.rcParams['legend.fontsize'] = 10
+
 fig = plt.figure()
 ax = fig.gca(projection='3d')
-for i in range(iters):
+for i in range(steps):
+    
+    # Plotting
+    #if (i%10==0): 
     print('Starting step {}'.format(i))
-    ax.scatter(vortex.getAllAxisCoords(0), 
+    ax.plot(vortex.getAllAxisCoords(0), 
            vortex.getAllAxisCoords(1),
            vortex.getAllAxisCoords(2), 
-           label='ring')
-    stepping.update_coords(vortex.segments, dt)
-    print(vortex.getCoords(1))
+           label='ring',
+           color='blue')
+    
+    # vortex evolution
+    makeStep(vortex.segments, dt)
+    addProperties(vortex.segments, velocity_superfluid)
+    
     
 #ax.legend()
 plt.show()
