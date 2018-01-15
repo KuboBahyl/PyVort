@@ -40,9 +40,7 @@ def calc_derivative(segments, item, order=1, radius=2):
         
         coeffs = calc_FDcoeffs(dists, order)
         
-        magnitude = coeffs.dot(neighCoords)
-        # normalization
-        derivative = magnitude / np.linalg.norm(magnitude)**order
+        derivative = coeffs.dot(neighCoords)
         return derivative
     
 def calc_velocity_LIA(segments, item):
@@ -63,11 +61,19 @@ def add_properties(segments, v_s):
     for item in segments:
         if (item['backward'] and item['forward']) is not None:
             if (go_backward(segments, item)['backward'] and go_forward(segments, item)['forward']) is not None:
+                # derivatives
                 item['tangent'] = calc_derivative(segments, item)
-                item['curvature'] = calc_derivative(segments, item, radius=2, order=2)
+                item['curvature'] = calc_derivative(segments, item, order=2)
+                
+                # normalization
+                mt = np.linalg.norm(item['tangent'])
+                item['tangent'] /= mt
+                item['curvature'] /= mt**2
+                
+                # velocities
                 item['velocity_LIA'] = calc_velocity_LIA(segments, item)
                 item['velocity_Biot'] = calc_velocity_BSL(segments, item)
-                item['velocity'] = calc_velocity_full(segments, item, v_s)
+                item['velocity_total'] = calc_velocity_full(segments, item, v_s)
             else:
                 item['tangent'] = None
                 item['curvature'] = None

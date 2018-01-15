@@ -16,7 +16,7 @@ N = len(testPositions)
 # init
 testVortex = Vortex(testPositions)
 
-# fixing neigbours for testline
+# fixing neighbours for testline
 testVortex.segments[0]['backward'] = None
 testVortex.segments[N-1]['forward'] = None
 

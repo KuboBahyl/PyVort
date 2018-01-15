@@ -7,4 +7,4 @@ Created on Wed Dec 20 18:32:55 2017
 """
 def update_coords(segments, dt):
     for item in segments:
-        item['coords'] += item['velocity'] * dt
+        item['coords'] += item['velocity_total'] * dt

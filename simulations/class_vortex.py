@@ -19,13 +19,14 @@ class Vortex(object):
     """
     Constructor attributes:
         N: initial number of segments
-        segments: dicts with positions, list position, derivatives, velocities
+        segments: list of dicts with 3D coordinates
     """
-
-    def __init__(self, positions):
-        self.N = len(positions)
+    
+    # basic neighbour init
+    def __init__(self, coords):
+        self.N = len(coords)
         self.segments = np.array([
-                {'coords' : positions[i],
+                {'coords' : coords[i],
                  'backward' : i-1,
                  'forward' : i+1} 
                 for i in range(self.N) 
@@ -41,8 +42,9 @@ class Vortex(object):
         return self.segments[item['forward']]     
 
 ######################################
-### USER'S OPTION
+### USER'S OPTIONS
 ######################################
+        
     def addSegment_Dumb(self, back, forw, coords):
         new_index = len(self.segments)
         self.segments = np.append(self.segments, 
@@ -59,7 +61,10 @@ class Vortex(object):
     def getAllAxisCoords(self, axis):
         return [self.segments[i]['coords'][axis] 
                 for i  in range(self.N)]
+        
 """
+Maybe it will be useful later
+
     def get_index(self, position):
         if (position >= 0):
             if self.segments[position]['forward'] == position + 1:

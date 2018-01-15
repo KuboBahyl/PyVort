@@ -4,6 +4,7 @@
 import numpy as np
 
 # solving M*coeffs = b
+# Finite difference coefficients using 2 neighbours on each side
 
 def calc_FDcoeffs(h, order):
 

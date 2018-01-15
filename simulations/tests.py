@@ -15,5 +15,3 @@ def fullLength(segments):
                 dist = np.linalg.norm( item['coords'] - nextItem['coords'] )
                 length += dist
         return length
-
-print('All tests passed!')

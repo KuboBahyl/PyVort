@@ -6,7 +6,7 @@ To clear all data, execute `%reset` in ipython console
 """
 #%%
 ###################
-###   IMPORTS   ###
+###   IMPORTS   
 ###################
 
 # Libraries
@@ -19,6 +19,7 @@ import generator_positions
 import class_vortex
 import generator_props
 import stepping
+from tests import fullLength
 
 # Basic operations init
 def createPositions(shape, pieces, *args):
@@ -34,15 +35,16 @@ def makeStep(segments, dt):
     return stepping.update_coords(segments, dt)
 
 #%%
+    
 ##################################
-###   SINGLE VORTEX CREATION   ###
+###   SINGLE VORTEX CREATION
 ##################################
 
 # Initial position
 shape = 'ring'
 pieces = 100
 center = [0,0,0]
-radius = 0.001
+radius = 1e-5
 
 positions = createPositions(shape, pieces, center, radius)
 
@@ -58,33 +60,40 @@ velocity_superfluid = np.zeros(3)
 addProperties(vortex.segments, velocity_superfluid)
 
 #%%
+
 ##########################
 ###   TIME EVOLUTION   ###
 ##########################
 
 # Time steps and steplength
-steps = 10
-dt=0.1
+steps = 5
+dt=0.00001
 
 #mpl.rcParams['legend.fontsize'] = 10
 
 fig = plt.figure()
 ax = fig.gca(projection='3d')
+
 for i in range(steps):
     
     # Plotting
     #if (i%10==0): 
-    print('Starting step {}'.format(i))
-    ax.plot(vortex.getAllAxisCoords(0), 
+    print('Starting step {}:'.format(i))
+    lengthReal = fullLength(vortex.segments)
+    lengthTheor = 2*np.pi*radius
+    error = 100*np.abs(lengthReal - lengthTheor) / lengthTheor 
+    
+    print('Vortex length error: {}%'.format(round(error, 3)) )
+    ax.scatter(vortex.getAllAxisCoords(0), 
            vortex.getAllAxisCoords(1),
            vortex.getAllAxisCoords(2), 
-           label='ring',
-           color='blue')
+           label='ring')
     
     # vortex evolution
     makeStep(vortex.segments, dt)
     addProperties(vortex.segments, velocity_superfluid)
     
-    
 #ax.legend()
+plt.title('Ring instability')
+plt.savefig('ring-instability.pdf')
 plt.show()
