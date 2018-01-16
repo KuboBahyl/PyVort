@@ -6,14 +6,15 @@ Created on Wed Dec 20 18:32:55 2017
 @author: kubo
 """
 import numpy as np
-import class_vortex
-import generator_props
+import copy as cp
+import vortexclass
+import properties
 
 def createVortex(positions):
-    return class_vortex.Vortex(positions)
+    return vortexclass.Vortex(positions)
 
 def updateProperties(segments):
-    return generator_props.add_properties(segments)
+    return properties.add_properties(segments)
 
 ###############################################################
 
@@ -26,7 +27,7 @@ def euler_step(vortex, dt):
 
 def rk4_step(vortex, dt):
     # making vortex copy
-    virtualVortex = vortex
+    virtualVortex = cp.deepcopy(vortex)
 
     # real and virtual segments
     real_seg = vortex.segments

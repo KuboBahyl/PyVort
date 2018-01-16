@@ -76,7 +76,7 @@ def add_properties(segments):
                 # normalisation
                 norm = np.linalg.norm(item['tangent'])
                 item['tangent'] /= norm
-                item['curvature'] /= norm**2
+                item['curvature'] /= norm**2 # maybe not so useful
                 
                 # velocities
                 item['velocity_LIA'] = calc_velocity_LIA(segments, item)
