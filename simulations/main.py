@@ -6,7 +6,7 @@ To clear all data, execute `%reset` in ipython console
 """
 #%%
 ###################
-###   IMPORTS   
+###   IMPORTS
 ###################
 
 # Libraries
@@ -17,8 +17,8 @@ import matplotlib.pyplot as plt
 # Objects, functions
 import generator_positions
 import class_vortex
-import generator_props
 import stepping
+import generator_props
 from tests import fullLength
 
 # Basic operations init
@@ -28,14 +28,17 @@ def createPositions(shape, pieces, *args):
 def createVortex(positions):
     return class_vortex.Vortex(positions)
 
-def addProperties(segments, velocity_superfluid):
-    return generator_props.add_properties(segments, velocity_superfluid)
+def eulerStep(vortex, dt):
+    return stepping.euler_step(vortex, dt)
 
-def makeStep(segments, dt):
-    return stepping.update_coords(segments, dt)
+def rk4Step(vortex, dt):
+    return stepping.rk4_step(vortex, dt)
+
+def updateProperties(segments):
+    return generator_props.add_properties(segments)
 
 #%%
-    
+
 ##################################
 ###   SINGLE VORTEX CREATION
 ##################################
@@ -55,9 +58,8 @@ vortex = createVortex(positions)
 vortex.segments[0]['backward'] = pieces - 1
 vortex.segments[pieces-1]['forward'] = 0
 
-# Adding properties - first and second derivation, velocities (superfluid)
-velocity_superfluid = np.zeros(3)
-addProperties(vortex.segments, velocity_superfluid)
+# Adding properties - s', s'', velocities
+updateProperties(vortex.segments)
 
 #%%
 
@@ -66,7 +68,7 @@ addProperties(vortex.segments, velocity_superfluid)
 ##########################
 
 # Time steps and steplength
-steps = 5
+steps = 2
 dt=0.00001
 
 #mpl.rcParams['legend.fontsize'] = 10
@@ -75,25 +77,33 @@ fig = plt.figure()
 ax = fig.gca(projection='3d')
 
 for i in range(steps):
-    
+
     # Plotting
-    #if (i%10==0): 
+    #if (i%10==0):
+
+    # Testing parameters
     print('Starting step {}:'.format(i))
-    lengthReal = fullLength(vortex.segments)
     lengthTheor = 2*np.pi*radius
-    error = 100*np.abs(lengthReal - lengthTheor) / lengthTheor 
-    
-    print('Vortex length error: {}%'.format(round(error, 3)) )
-    ax.scatter(vortex.getAllAxisCoords(0), 
+    lengthReal = fullLength(vortex.segments)
+    lengthError = 100*np.abs(lengthReal - lengthTheor) / lengthTheor
+
+    curvTheor = 1/radius
+    curvReal = np.linalg.norm(vortex.segments[0]['curvature'])
+    curvError = 100*np.abs(curvReal - curvTheor) / curvTheor
+
+    print('Vortex length error: {}%'.format(round(lengthError, 3)) )
+    print('Curvature error : {}%'.format(round(curvError, 3)))
+
+    # Plotting
+    ax.scatter(vortex.getAllAxisCoords(0),
            vortex.getAllAxisCoords(1),
-           vortex.getAllAxisCoords(2), 
+           vortex.getAllAxisCoords(2),
            label='ring')
-    
-    # vortex evolution
-    makeStep(vortex.segments, dt)
-    addProperties(vortex.segments, velocity_superfluid)
-    
+
+    # Time evolution
+    rk4Step(vortex, dt)
+
 #ax.legend()
 plt.title('Ring instability')
-plt.savefig('ring-instability.pdf')
+#plt.savefig('ring-instability.pdf')
 plt.show()

@@ -15,53 +15,53 @@ Vortex class content:
 import numpy as np
 
 class Vortex(object):
-    
+
     """
     Constructor attributes:
         N: initial number of segments
         segments: list of dicts with 3D coordinates
     """
-    
+
     # basic neighbour init
     def __init__(self, coords):
         self.N = len(coords)
         self.segments = np.array([
                 {'coords' : coords[i],
                  'backward' : i-1,
-                 'forward' : i+1} 
-                for i in range(self.N) 
+                 'forward' : i+1}
+                for i in range(self.N)
                 ])
-   
+
     def __repr__(self):
         return 'Quantum Vortex object. Check documentation for available methods.'
 
     def go_backward(self, item):
         return self.segments[item['backward']]
-    
+
     def go_forward(self, item):
-        return self.segments[item['forward']]     
+        return self.segments[item['forward']]
 
 ######################################
 ### USER'S OPTIONS
 ######################################
-        
+
     def addSegment_Dumb(self, back, forw, coords):
         new_index = len(self.segments)
-        self.segments = np.append(self.segments, 
+        self.segments = np.append(self.segments,
                                   {'coords' : coords,
                                    'backward' : back,
                                    'forward' : forw})
         self.segments[back]['forward'] = new_index
         self.segments[forw]['backward'] = new_index
-        
-    def getCoords(self, index):
-        #index = self.get_index(position)
-        return self.segments[index]['coords']
+
+    def getAllCoords(self, index):
+        return [self.segments[i]['coords']
+                for i in range(self.N)]
 
     def getAllAxisCoords(self, axis):
-        return [self.segments[i]['coords'][axis] 
+        return [self.segments[i]['coords'][axis]
                 for i  in range(self.N)]
-        
+
 """
 Maybe it will be useful later
 

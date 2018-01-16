@@ -14,6 +14,7 @@ import numpy as np
 kappa = c.quantum_vorticity
 a = c.vortex_width
 v_s = c.velocity_superfluid
+rho = c.density_total
 
 def go_backward(segments, item):
         return segments[item['backward']]
@@ -49,31 +50,38 @@ def calc_velocity_LIA(segments, item):
     v_lia = beta * np.cross(item['tangent'], item['curvature'])
     return v_lia
     
-def calc_velocity_BSL(segments, item):
-    v_biot = 0 #kappa / (4*np.pi) # * BIOT-savart integral
-    return v_biot
+def calc_velocity_drive(segments, item):
+    B1, B2, rho_n = np.zeros(3)
+    
+    alpha1 = rho_n*B1 / (2*rho)
+    alpha2 = rho_n*B2 / (2*rho)
+    v_tot = item['velocity_LIA'] + v_s
+    
+    v_drive = alpha1*np.cross(item['tangent'], v_tot) + alpha2*v_tot
+    return v_drive
 
-def calc_velocity_full(segments, item, v_s):
-    v_full = item['velocity_LIA'] + item['velocity_Biot'] + v_s
+def calc_velocity_full(segments, item):
+    v_full = item['velocity_LIA'] + v_s + item['velocity_drive'] 
     return v_full
 
-def add_properties(segments, v_s):
+def add_properties(segments):
     for item in segments:
         if (item['backward'] and item['forward']) is not None:
             if (go_backward(segments, item)['backward'] and go_forward(segments, item)['forward']) is not None:
+                
                 # derivatives
                 item['tangent'] = calc_derivative(segments, item)
                 item['curvature'] = calc_derivative(segments, item, order=2)
                 
-                # normalization
-                mt = np.linalg.norm(item['tangent'])
-                item['tangent'] /= mt
-                item['curvature'] /= mt**2
+                # normalisation
+                norm = np.linalg.norm(item['tangent'])
+                item['tangent'] /= norm
+                item['curvature'] /= norm**2
                 
                 # velocities
                 item['velocity_LIA'] = calc_velocity_LIA(segments, item)
-                item['velocity_Biot'] = calc_velocity_BSL(segments, item)
-                item['velocity_total'] = calc_velocity_full(segments, item, v_s)
+                item['velocity_drive'] = calc_velocity_drive(segments, item)
+                item['velocity_line'] = calc_velocity_full(segments, item)
             else:
                 item['tangent'] = None
                 item['curvature'] = None
