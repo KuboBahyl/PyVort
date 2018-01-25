@@ -41,6 +41,7 @@ def updateProperties(segments):
 ##################################
 ###   SINGLE VORTEX CREATION
 ##################################
+print('Initializing vortex...')
 
 # Initial position
 shape = 'ring'
@@ -65,9 +66,10 @@ updateProperties(vortex.segments)
 ##########################
 ###   TIME EVOLUTION   ###
 ##########################
+print('Time evolution started...')
 
 # Time steps and steplength
-iters = 100
+iters = 501
 dt=1e-2
 
 #mpl.rcParams['legend.fontsize'] = 10
@@ -77,7 +79,7 @@ ax = fig.gca(projection='3d')
 
 for i in range(iters):
 
-    if (i%5==0): 
+    if (i%50==0):
         print('Starting step {}:'.format(i))
 
     # Testing parameters

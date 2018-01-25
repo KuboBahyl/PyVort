@@ -28,7 +28,12 @@ class Vortex(object):
         self.segments = np.array([
                 {'coords' : coords[i],
                  'backward' : i-1,
-                 'forward' : i+1}
+                 'forward' : i+1,
+                 'tangent' : None,
+                 'curvature' : None,
+                 'velocity_LIA' : None,
+                 'velocity_drive' : None,
+                 'velocity_line' : None}
                 for i in range(self.N)
                 ])
 

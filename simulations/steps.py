@@ -7,11 +7,7 @@ Created on Wed Dec 20 18:32:55 2017
 """
 import numpy as np
 import copy as cp
-import vortexclass
 import properties
-
-def createVortex(positions):
-    return vortexclass.Vortex(positions)
 
 def updateProperties(segments):
     return properties.add_properties(segments)
