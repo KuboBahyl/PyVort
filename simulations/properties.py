@@ -9,6 +9,7 @@ import constants as c
 from vandermonde import calc_FDcoeffs
 
 import numpy as np
+import math
 
 kappa = c.quantum_vorticity
 a = c.vortex_width
@@ -80,3 +81,50 @@ def add_properties(segments):
                 item['velocity_LIA'] = calc_velocity_LIA(segments, item)
                 item['velocity_drive'] = calc_velocity_drive(segments, item)
                 item['velocity_line'] = calc_velocity_full(segments, item)
+
+def new_connection(segments):
+    N = len(segments)
+    new_segments = segments
+    segments = np.delete(segments, segments[0])
+
+    for i in range(N-1):
+        focus_item = new_segments[i]
+        mindist = math.inf
+
+        for item in segments:
+            dist = np.linalg.norm(focus_item['coords'] - item['coords'])
+            if (dist < mindist):
+                mindist = dist
+                new_segments[i]['forward'] = np.asscalar(np.argwhere(segments==item))
+                new_segments[i+1] = item
+
+        segments = np.delete(segments, new_segments[i]['forward'])
+
+
+    return new_segments
+
+
+
+def new_segmentation(segments):
+# assumes that indices are already assigned
+    dmin = 0
+    dmax = 100
+    for item in segments:
+        nextItem = segments[item['forward']]
+        dist = np.linalg.norm(item['coords'] - nextItem['coords'])
+        if (dist < dmin):
+            segments = np.append(segments, {'coords' : (item['coords'] + nextItem['coords']) / 2,
+                                            'backward' : item['backward'],
+                                            'forward' : nextItem['forward']})
+            new_index = len(segments)
+            segments[item['backward']]['forward'] = new_index
+            segments[nextItem['forward']]['backward'] = new_index
+            segments = np.delete(segments, [item, nextItem])
+
+        elif (dist > dmax):
+            segments = np.append(segments, {'coords' : (item['coords'] + nextItem['coords']) / 2,
+                                            'backward' : nextItem['backward'],
+                                            'forward' : item['forward']})
+            new_index = len(segments)
+            item['forward'] = new_index
+            nextItem['backward'] = new_index
