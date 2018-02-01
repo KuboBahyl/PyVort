@@ -11,11 +11,14 @@ from vandermonde import calc_FDcoeffs
 import numpy as np
 import math
 
-kappa = c.quantum_vorticity
-a = c.vortex_width
-v_s = c.velocity_superfluid
 rho = c.density_total
 rho_s = c.density_superfluid
+v_n = c.velocity_normal
+v_s = c.velocity_superfluid
+
+kappa = c.quantum_vorticity
+a = c.vortex_width
+
 alpha1 = c.alpha1_mutual
 alpha2 = c.alpha2_mutual
 
@@ -47,23 +50,27 @@ def calc_derivative(segments, item, order=1, radius=2):
         derivative = coeffs.dot(neighCoords)
         return derivative
 
-def calc_velocity_LIA(segments, item):
+def calc_velocity_LIA(item):
     r = 1 / np.linalg.norm(item['curvature'])
     beta = kappa * np.log(r/a) / (4*np.pi)
     v_lia = beta * np.cross(item['tangent'], item['curvature'])
     return v_lia
 
-def calc_velocity_drive(segments, item):
-    v_tot = item['velocity_LIA'] + v_s
+def calc_velocity_drive(item):
+    v_ns = v_n - v_s
+    v_lia = item['velocity_LIA']
 
-    v_drive = alpha1*np.cross(item['tangent'], v_tot) + alpha2*v_tot
-    return v_drive
+    v_drive1 = np.cross(item['tangent'], v_ns - v_lia)
+    v_drive2 = np.cross(item['tangent'], v_drive1)
+    v_drive_full = alpha1*v_drive1 - alpha2*v_drive2
+    return v_drive_full
 
-def calc_velocity_full(segments, item):
+def calc_velocity_full(item):
     v_full = item['velocity_LIA'] + v_s + item['velocity_drive']
     return v_full
 
-def add_properties(segments):
+def add_properties(vortex):
+    segments = vortex.segments
     for item in segments:
         if (item['backward'] and item['forward']) is not None:
             if (go_backward(segments, item)['backward'] and go_forward(segments, item)['forward']) is not None:
@@ -78,11 +85,14 @@ def add_properties(segments):
                 item['curvature'] /= norm**2 # maybe not so useful
 
                 # velocities
-                item['velocity_LIA'] = calc_velocity_LIA(segments, item)
-                item['velocity_drive'] = calc_velocity_drive(segments, item)
-                item['velocity_line'] = calc_velocity_full(segments, item)
+                item['velocity_LIA'] = calc_velocity_LIA(item)
+                item['velocity_drive'] = calc_velocity_drive(item)
+                item['velocity_line'] = calc_velocity_full(item)
 
-def new_connection(segments):
+# TODO new everything
+def new_connections(vortex):
+    pass
+    """
     N = len(segments)
     new_segments = segments
     segments = np.delete(segments, segments[0])
@@ -102,29 +112,41 @@ def new_connection(segments):
 
 
     return new_segments
+    """
 
 
 
-def new_segmentation(segments):
+def new_segmentation(vortex, dmin, dmax):
 # assumes that indices are already assigned
-    dmin = 0
-    dmax = 100
+    segments = vortex.segments
+
+    dmin /= 10**4
+    dmax /= 10**4
+
     for item in segments:
         nextItem = segments[item['forward']]
         dist = np.linalg.norm(item['coords'] - nextItem['coords'])
+
         if (dist < dmin):
             segments = np.append(segments, {'coords' : (item['coords'] + nextItem['coords']) / 2,
                                             'backward' : item['backward'],
                                             'forward' : nextItem['forward']})
-            new_index = len(segments)
+            new_index = len(segments) - 1
             segments[item['backward']]['forward'] = new_index
             segments[nextItem['forward']]['backward'] = new_index
-            segments = np.delete(segments, [item, nextItem])
+            segments = np.delete(segments, [item['forward'], nextItem['backward']])
 
-        elif (dist > dmax):
+        elif (dist > dmax): #TODO local fit approx instead of new point in the middle
             segments = np.append(segments, {'coords' : (item['coords'] + nextItem['coords']) / 2,
                                             'backward' : nextItem['backward'],
                                             'forward' : item['forward']})
             new_index = len(segments)
             item['forward'] = new_index
             nextItem['backward'] = new_index
+
+
+"""
+GOALS:
+    - leapfrogging - two circles orbiting each other
+    - intersection of two circles: as Emil's simulation
+"""

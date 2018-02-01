@@ -9,8 +9,8 @@ import numpy as np
 import copy as cp
 import properties
 
-def updateProperties(segments):
-    return properties.add_properties(segments)
+def updateVelocities(vortex):
+    return properties.add_properties(vortex)
 
 ###############################################################
 
@@ -18,8 +18,6 @@ def euler_step(vortex, dt):
     segments = vortex.segments
     for item in segments:
         item['coords'] += item['velocity_line'] * dt
-
-    updateProperties(segments)
 
 def rk4_step(vortex, dt):
     # making vortex copy
@@ -37,22 +35,20 @@ def rk4_step(vortex, dt):
         k1[i] = real_seg[i]['velocity_line']
         virtual_seg[i]['coords'] = real_seg[i]['coords'] + k1[i] * dt * 0.5
 
-    updateProperties(virtual_seg)
+    updateVelocities(virtualVortex)
 
     for i in range(N):
         k2[i] = virtual_seg[i]['velocity_line']
         virtual_seg[i]['coords'] = real_seg[i]['coords'] + k2[i] * dt * 0.5
 
-    updateProperties(virtual_seg)
+    updateVelocities(virtualVortex)
 
     for i in range(N):
         k3[i] = virtual_seg[i]['velocity_line']
         virtual_seg[i]['coords'] = real_seg[i]['coords'] + k3[i] * dt
 
-    updateProperties(virtual_seg)
+    updateVelocities(virtualVortex)
 
     for i in range(N):
         k4[i] = virtual_seg[i]['velocity_line']
         real_seg[i]['coords'] += (1/6) * (k1[i] + 2*k2[i] + 2*k3[i] + k4[i]) * dt
-
-    updateProperties(real_seg)

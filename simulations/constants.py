@@ -9,6 +9,7 @@ Created on Mon Dec 18 21:42:16 2017
 quantum_vorticity = 9.97e-4 # cm^2/s
 vortex_width = 1e-8 # cm = 0.1nm
 velocity_superfluid = 0 # cm/s
+velocity_normal = 0 # cm/s
 
 temperature = 1.5 # K
 density_total = 0.14516 # g/cm^3
