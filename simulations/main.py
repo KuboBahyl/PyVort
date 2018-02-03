@@ -16,36 +16,28 @@ import matplotlib.pyplot as plt
 
 # Objects, functions
 import positions
-import vortexclass
 import steps
-import properties
+
+from vortexclass import Vortex as createVortex
+from properties import new_segmentation as updateSegmentation
+from properties import new_connections as updateConnections
+from properties import add_properties as updateVelocities
+from tests import do_statistics as showStat
 
 # Basic operations init
 def createPositions(shape, pieces, *args):
-    return positions.generate_positions(shape, pieces, *args)
-
-def createVortex(positions):
-    return vortexclass.Vortex(positions)
-
-def eulerStep(vortex, dt):
-    return steps.euler_step(vortex, dt)
+    if (shape == 'line'):
+        return positions.create_line(shape, pieces, *args)
+    elif (shape == 'ring'):
+        return positions.create_ring(shape, pieces, *args)
+    elif (shape == 'random'):
+        return positions.create_random(shape, pieces, *args)
 
 def makeStep(vortex, dt, method):
     if method=="euler":
         return steps.euler_step(vortex, dt)
     elif method=="rk4":
         return steps.rk4_step(vortex, dt)
-
-def updateSegmentation(vortex, min_distance, max_distance):
-    return properties.new_segmentation(vortex, min_distance, max_distance)
-
-def updateConnections(vortex):
-    return properties.new_connections(vortex)
-
-def updateVelocities(vortex):
-    return properties.add_properties(vortex)
-
-
 
 #%%
 
@@ -82,7 +74,10 @@ print('Time evolution started...')
 
 # Time steps and steplength
 iters = 101
-dt=1e-3
+dt=3e-2
+
+min_distance=25
+max_distance=100
 
 #mpl.rcParams['legend.fontsize'] = 10
 
@@ -95,8 +90,8 @@ for i in range(iters):
         print('Starting step {}:'.format(i))
 
         # Testing parameters
-        exec(compile(open('tests.py').read(), 'tests.py', 'exec'))
-    
+        showStat(vortex, radius)
+
         # Plotting
         ax.plot(vortex.getAllAxisCoords(0),
                vortex.getAllAxisCoords(1),
@@ -105,9 +100,9 @@ for i in range(iters):
                color='blue')
 
     # Time evolution
-    makeStep(vortex, dt=1e-3, method="rk4")
+    makeStep(vortex, dt, method="rk4")
     updateConnections(vortex)
-    updateSegmentation(vortex, min_distance=25, max_distance=100)
+    updateSegmentation(vortex, min_distance, max_distance)
     updateVelocities(vortex)
 
 

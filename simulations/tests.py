@@ -20,19 +20,21 @@ def calc_testprops(segments):
         return length, curv, prod
 
 def calc_error(theor, real):
-    return 100*np.abs(theor - real) / theor
+    return 100*(real - theor) / theor
 
-lenReal, curvReal, prodReal = calc_testprops(vortex.segments)
+def do_statistics(vortex, radius):
 
-lenTheor = 2*np.pi*radius
-lenErr = calc_error(lenTheor, lenReal)
+    lenReal, curvReal, prodReal = calc_testprops(vortex.segments)
 
-curvTheor = 1/radius
-curvErr = calc_error(curvTheor, curvReal)
+    lenTheor = 2*np.pi*radius
+    lenErr = calc_error(lenTheor, lenReal)
 
-prodTheor = 1/radius
-prodErr = calc_error(prodTheor, prodReal)
+    curvTheor = 1/radius
+    curvErr = calc_error(curvTheor, curvReal)
 
-print('Vortex length error: {}%'.format(round(lenErr, 3)))
-print('Curvature |s\'\'| error : {}%'.format(round(curvErr, 3)))
-print('s\' x s\'\' product error: {}%'.format(round(prodErr, 3)))
+    prodTheor = 1/radius
+    prodErr = calc_error(prodTheor, prodReal)
+
+    print('Vortex length error: {}%'.format(round(lenErr, 3)))
+    print('Curvature |s\'\'| error : {}%'.format(round(curvErr, 3)))
+    print('s\' x s\'\' product error: {}%'.format(round(prodErr, 3)))

@@ -6,10 +6,10 @@ Created on Wed Dec 20 17:28:51 2017
 @author: kubo
 """
 import constants as c
-from vandermonde import calc_FDcoeffs
-
 import numpy as np
 import math
+
+from vandermonde import calc_FDcoeffs
 
 rho = c.density_total
 rho_s = c.density_superfluid
@@ -124,16 +124,17 @@ def new_segmentation(vortex, dmin, dmax):
     dmax /= 10**4
 
     for item in segments:
-        nextItem = segments[item['forward']]
+        nextItem = go_forward(segments, item)
         dist = np.linalg.norm(item['coords'] - nextItem['coords'])
+        print(dist * 10**4)
 
         if (dist < dmin):
             segments = np.append(segments, {'coords' : (item['coords'] + nextItem['coords']) / 2,
                                             'backward' : item['backward'],
                                             'forward' : nextItem['forward']})
             new_index = len(segments) - 1
-            segments[item['backward']]['forward'] = new_index
-            segments[nextItem['forward']]['backward'] = new_index
+            go_backward(segments, item)['forward'] = new_index
+            go_forward(segments, nextItem)['backward'] = new_index
             segments = np.delete(segments, [item['forward'], nextItem['backward']])
 
         elif (dist > dmax): #TODO local fit approx instead of new point in the middle
@@ -143,7 +144,6 @@ def new_segmentation(vortex, dmin, dmax):
             new_index = len(segments)
             item['forward'] = new_index
             nextItem['backward'] = new_index
-
 
 """
 GOALS:
