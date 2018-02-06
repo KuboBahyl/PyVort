@@ -10,6 +10,8 @@ To clear all data, execute `%reset` in ipython console
 ###################
 
 # Libraries
+import os
+os.chdir('/home/kubo/MEGAsync/Github/superfluid/simulations')
 import numpy as np
 from mpl_toolkits.mplot3d import Axes3D
 import matplotlib.pyplot as plt
@@ -73,8 +75,8 @@ updateVelocities(vortex)
 print('Time evolution started...')
 
 # Time steps and steplength
-iters = 101
-dt=3e-2
+iters = 10
+dt=1e-2
 
 min_distance=25
 max_distance=100
@@ -86,8 +88,8 @@ ax = fig.gca(projection='3d')
 
 for i in range(iters):
 
-    if (i%10==0):
-        print('Starting step {}:'.format(i))
+    if (i%1==0):
+        print('STARTING STEP {}...'.format(i))
 
         # Testing parameters
         showStat(vortex, radius)
@@ -110,3 +112,8 @@ for i in range(iters):
 #plt.title('Ring instability with Euler step')
 #plt.savefig('euler-50-instability.pdf')
 plt.show()
+#%%
+def test(segments):
+    for j in range(len(segments)):
+        seg = segments[j]
+        print("ind {}, back {}, forw {}".format(j, seg['backward'],seg['forward']))

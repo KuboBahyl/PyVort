@@ -40,11 +40,6 @@ class Vortex(object):
     def __repr__(self):
         return 'Quantum Vortex object. Check documentation for available methods.'
 
-    def go_backward(self, item):
-        return self.segments[item['backward']]
-
-    def go_forward(self, item):
-        return self.segments[item['forward']]
 
 ######################################
 ### USER'S OPTIONS
@@ -61,11 +56,11 @@ class Vortex(object):
 
     def getAllCoords(self, index):
         return [self.segments[i]['coords']
-                for i in range(self.N)]
+                for i in range(len(self.segments))]
 
     def getAllAxisCoords(self, axis):
         return [self.segments[i]['coords'][axis]
-                for i  in range(self.N)]
+                for i  in range(len(self.segments))]
 
 """
 Maybe it will be useful later

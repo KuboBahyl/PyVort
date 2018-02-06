@@ -23,10 +23,19 @@ alpha1 = c.alpha1_mutual
 alpha2 = c.alpha2_mutual
 
 def go_backward(segments, item):
-        return segments[item['backward']]
+    return segments[item['backward']]
 
 def go_forward(segments, item):
-        return segments[item['forward']]
+    return segments[item['forward']]
+
+def delete_item(segments, itemindex_to_delete):
+    segments = np.delete(segments, itemindex_to_delete)
+    for item in segments:
+        if (item['forward'] > itemindex_to_delete):
+            item['forward'] -= 1
+        if (item['backward'] > itemindex_to_delete):
+            item['backward'] -= 1
+    return segments
 
 def calc_derivative(segments, item, order=1, radius=2):
         for n in range(radius):
@@ -122,28 +131,40 @@ def new_segmentation(vortex, dmin, dmax):
 
     dmin /= 10**4
     dmax /= 10**4
+    i = 0
 
-    for item in segments:
-        nextItem = go_forward(segments, item)
-        dist = np.linalg.norm(item['coords'] - nextItem['coords'])
-        print(dist * 10**4)
+    while (i < len(segments)):
+        firstItem = segments[i]
+        nextItem = go_forward(segments, firstItem)
+        dist = np.linalg.norm(firstItem['coords'] - nextItem['coords'])
 
         if (dist < dmin):
-            segments = np.append(segments, {'coords' : (item['coords'] + nextItem['coords']) / 2,
-                                            'backward' : item['backward'],
+            # add new segment and remove the close ones
+            segments = np.append(segments, {'coords' : (firstItem['coords'] + nextItem['coords']) / 2,
+                                            'backward' : firstItem['backward'],
                                             'forward' : nextItem['forward']})
-            new_index = len(segments) - 1
-            go_backward(segments, item)['forward'] = new_index
-            go_forward(segments, nextItem)['backward'] = new_index
-            segments = np.delete(segments, [item['forward'], nextItem['backward']])
+
+            # update indices of new neighbours
+            newitem_index = len(segments) - 1
+            go_backward(segments, firstItem)['forward'] = newitem_index
+            go_forward(segments, nextItem)['backward'] = newitem_index
+
+            # safely delete disconnected segments
+            segments = delete_item(segments, firstItem['forward'])
+            segments = delete_item(segments, nextItem['backward'])
+
+            i-=1
 
         elif (dist > dmax): #TODO local fit approx instead of new point in the middle
-            segments = np.append(segments, {'coords' : (item['coords'] + nextItem['coords']) / 2,
+            segments = np.append(segments, {'coords' : (firstItem['coords'] + nextItem['coords']) / 2,
                                             'backward' : nextItem['backward'],
-                                            'forward' : item['forward']})
-            new_index = len(segments)
-            item['forward'] = new_index
-            nextItem['backward'] = new_index
+                                            'forward' : firstItem['forward']})
+            newitem_index = len(segments) - 1
+            firstItem['forward'] = newitem_index
+            nextItem['backward'] = newitem_index
+
+        i += 1
+    vortex.segments = segments
 
 """
 GOALS:
