@@ -9,7 +9,7 @@ import constants as c
 import numpy as np
 import math
 
-from vandermonde import calc_FDcoeffs
+import vandermonde
 
 rho = c.density_total
 rho_s = c.density_superfluid
@@ -38,26 +38,26 @@ def delete_item(segments, itemindex_to_delete):
     return segments
 
 def calc_derivative(segments, item, order=1, radius=2):
-        for n in range(radius):
-            item = go_backward(segments, item)
-        firstItem = item
+    # start with the first item in range
+    for n in range(radius):
+        item = go_backward(segments, item)
+    firstItem = item
 
-        neighCoords = []
-        thisItem = firstItem
-        for i in range(2*radius+1):
-            neighCoords.append( thisItem['coords'] )
-            thisItem = go_forward(segments, thisItem)
+    # extract coords from each item
+    neighCoords = []
+    thisItem = firstItem
+    for i in range(2*radius+1):
+        neighCoords.append(thisItem['coords'])
+        thisItem = go_forward(segments, thisItem)
 
-        loc_index = radius
+    # calculate coeffs for numeric derivative
+    try:
+        coeffs = vandermonde.calc_FDcoeffs_invert(neighCoords, order, radius)
+    except:
+        coeffs = vandermonde.calc_FDcoeffs_closed(neighCoords, order, radius)
 
-        dists = [ np.linalg.norm( neighCoords[loc_index] - neighCoords[n] )
-                  for n in range(2*radius+1)
-                  if n != loc_index ]
-
-        coeffs = calc_FDcoeffs(dists, order)
-
-        derivative = coeffs.dot(neighCoords)
-        return derivative
+    derivative = coeffs.dot(neighCoords)
+    return derivative
 
 def calc_velocity_LIA(item):
     r = 1 / np.linalg.norm(item['curvature'])

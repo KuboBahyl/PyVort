@@ -46,7 +46,7 @@ def makeStep(vortex, dt, method):
 ##################################
 ###   SINGLE VORTEX CREATION
 ##################################
-print('Initializing vortex...')
+print('Initializing vortex of radius 1mm...')
 
 # Initial position
 shape = 'ring'
@@ -75,10 +75,10 @@ updateVelocities(vortex)
 print('Time evolution started...')
 
 # Time steps and steplength
-iters = 10
+iters = 5001
 dt=1e-2
 
-min_distance=25
+min_distance=50
 max_distance=100
 
 #mpl.rcParams['legend.fontsize'] = 10
@@ -88,12 +88,13 @@ ax = fig.gca(projection='3d')
 
 for i in range(iters):
 
-    if (i%1==0):
+    if (i%100==0):
         print('STARTING STEP {}...'.format(i))
 
         # Testing parameters
         showStat(vortex, radius)
 
+    if (i%250==0):
         # Plotting
         ax.plot(vortex.getAllAxisCoords(0),
                vortex.getAllAxisCoords(1),
