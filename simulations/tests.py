@@ -66,3 +66,5 @@ def do_statistics(vortex, radius):
     print('Curvature |s\'\'| error : {}%'.format(round(curvErr, 2)))
     print('|s\' x s\'\'| product error: {}%'.format(round(prodErr, 2)))
     print('....................')
+
+    return np.absolute(velX), velTheor

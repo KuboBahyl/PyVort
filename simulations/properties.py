@@ -52,7 +52,7 @@ def calc_derivative(segments, item, order=1, radius=2):
 
     # calculate coeffs for numeric derivative
     try:
-        coeffs = vandermonde.calc_FDcoeffs_invert(neighCoords, order, radius)
+        coeffs = vandermonde.calc_FDcoeffs_inverse(neighCoords, order, radius)
     except:
         coeffs = vandermonde.calc_FDcoeffs_closed(neighCoords, order, radius)
 

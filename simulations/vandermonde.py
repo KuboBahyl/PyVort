@@ -6,7 +6,7 @@ import numpy as np
 # solving M*coeffs = b
 # Finite difference coefficients using 2 neighbours on each side
 
-def calc_FDcoeffs_invert(coords, order, radius):
+def calc_FDcoeffs_inverse(coords, order, radius):
     center = radius
     l1, l2, l3, l4 = [np.linalg.norm(coords[n] - coords[center])
                           for n in range(2*radius+1)
