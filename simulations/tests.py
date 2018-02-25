@@ -68,3 +68,8 @@ def do_statistics(vortex, radius):
     print('....................')
 
     return np.absolute(velX), velTheor
+
+def test_indices(segments):
+    for j in range(len(segments)):
+        seg = segments[j]
+        print("ind {}, back {}, forw {}".format(j, seg['backward'],seg['forward']))

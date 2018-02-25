@@ -7,6 +7,8 @@ import numpy as np
 # Finite difference coefficients using 2 neighbours on each side
 
 def calc_FDcoeffs_inverse(coords, order, radius):
+
+    # works for order from 1 to 4
     center = radius
     l1, l2, l3, l4 = [np.linalg.norm(coords[n] - coords[center])
                           for n in range(2*radius+1)
@@ -34,6 +36,7 @@ def calc_FDcoeffs_inverse(coords, order, radius):
     return coeffs
 
 def calc_FDcoeffs_closed(coords, order, radius):
+    # works for orders only 1 and 2
     l1, l2, l3, l4 = [np.linalg.norm(coords[n] - coords[n+1])
                   for n in range(2*radius)]
 

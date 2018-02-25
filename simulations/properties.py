@@ -5,6 +5,9 @@ Created on Wed Dec 20 17:28:51 2017
 
 @author: kubo
 """
+from scipy import interpolate
+from spline3D import spline3D
+
 import constants as c
 import numpy as np
 import math
@@ -134,34 +137,44 @@ def new_segmentation(vortex, dmin, dmax):
     i = 0
 
     while (i < len(segments)):
-        firstItem = segments[i]
-        nextItem = go_forward(segments, firstItem)
-        dist = np.linalg.norm(firstItem['coords'] - nextItem['coords'])
+        item = segments[i]
+        next_item = go_forward(segments, item)
+        dist = np.linalg.norm(item['coords'] - next_item['coords'])
 
         if (dist < dmin):
+            #make local interpolation with line using 4 points
+            new_point = spline3D(segments, item, next_item, "min_error")
+
             # add new segment and remove the close ones
-            segments = np.append(segments, {'coords' : (firstItem['coords'] + nextItem['coords']) / 2,
-                                            'backward' : firstItem['backward'],
-                                            'forward' : nextItem['forward']})
+            segments = np.append(segments, {'coords' :  new_point,
+                                            'backward' : item['backward'],
+                                            'forward' : next_item['forward']})
 
             # update indices of new neighbours
             newitem_index = len(segments) - 1
-            go_backward(segments, firstItem)['forward'] = newitem_index
-            go_forward(segments, nextItem)['backward'] = newitem_index
+            go_backward(segments, item)['forward'] = newitem_index
+            go_forward(segments, next_item)['backward'] = newitem_index
 
             # safely delete disconnected segments
-            segments = delete_item(segments, firstItem['forward'])
-            segments = delete_item(segments, nextItem['backward'])
+            segments = delete_item(segments, item['forward'])
+            segments = delete_item(segments, next_item['backward'])
 
             i-=1
+            item = go_backward(segments, item)
 
-        elif (dist > dmax): #TODO local fit approx instead of new point in the middle
-            segments = np.append(segments, {'coords' : (firstItem['coords'] + nextItem['coords']) / 2,
-                                            'backward' : nextItem['backward'],
-                                            'forward' : firstItem['forward']})
+        elif (dist > dmax):
+            #make local interpolation with line using 4 points
+            #new_point = spline3D(segments, item, next_item, "max_error")
+
+            # add new segment along the distant ones
+            segments = np.append(segments, {'coords' : (item['coords'] + next_item['coords']) / 2,#new_point,
+                                            'backward' : next_item['backward'],
+                                            'forward' : item['forward']})
+
+            # update indices of new neighbours
             newitem_index = len(segments) - 1
-            firstItem['forward'] = newitem_index
-            nextItem['backward'] = newitem_index
+            item['forward'] = newitem_index
+            next_item['backward'] = newitem_index
 
         i += 1
     vortex.segments = segments

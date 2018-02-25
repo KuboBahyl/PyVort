@@ -76,11 +76,11 @@ updateVelocities(vortex)
 print('Time evolution started...')
 
 # Time steps and steplength
-iters = 10001
+iters = 3
 dt=1e-2
 
-min_distance=50 #um
-max_distance=100 #um
+min_distance=0 #um
+max_distance=62.8 #um
 max_shift = 2 #um
 
 velocities_real = []
@@ -90,8 +90,8 @@ fig = plt.figure()
 ax = fig.gca(projection='3d')
 
 # other parameters
-graphs = 25
-reports = 100
+graphs = 3
+reports = 3
 
 for i in range(iters):
 
@@ -102,11 +102,11 @@ for i in range(iters):
         vel_real, vel_theor = showStat(vortex, radius)
         velocities_real.append(vel_real)
         velocities_theor.append(vel_theor)
-        
+
 
     if (i%round(iters/graphs)==0):
         # Plotting
-        ax.plot(vortex.getAllAxisCoords(0),
+        ax.scatter(vortex.getAllAxisCoords(0),
                    vortex.getAllAxisCoords(1),
                    vortex.getAllAxisCoords(2),
                    label='ring',
@@ -115,11 +115,11 @@ for i in range(iters):
     # Time evolution
     makeStep(vortex, dt, method="rk4")
     velocity = np.absolute(vortex.segments[0]['velocity_line'][0])
-    if (10000*velocity*dt > max_shift):
-        dt *= 1/2 
+    #if (10000*velocity*dt > max_shift):
+    #    dt *= 1/2 
     updateConnections(vortex)
     updateSegmentation(vortex, min_distance, max_distance)
-    min_distance = len(vortex.segments) / 2
+    #min_distance = len(vortex.segments) / 2
     updateVelocities(vortex)
 
 
@@ -129,25 +129,11 @@ plt.title('Ring motion')
 
 # Velicity evolution
 plt.figure()
-plt.scatter([i*round(iters/reports) for i in range(reports+1)], velocities_real,
+plt.scatter([i*round(iters/reports) for i in range(reports)], velocities_real,
              label="Simulation")
-plt.scatter([i*round(iters/reports) for i in range(reports+1)], velocities_theor, 
+plt.scatter([i*round(iters/reports) for i in range(reports)], velocities_theor,
              label="Theory")
 plt.legend(loc=2)
 plt.title('Velocity evolution')
 
 #%%
-def test(segments):
-    for j in range(len(segments)):
-        seg = segments[j]
-        print("ind {}, back {}, forw {}".format(j, seg['backward'],seg['forward']))
-
-dt=0.001
-def change_dt(word):
-    global dt
-    for i in range(10):
-        print(i*dt)
-        if (word=="yes"):
-            dt = 100
-        else: 
-            print("ok")

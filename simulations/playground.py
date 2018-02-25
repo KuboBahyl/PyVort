@@ -6,40 +6,37 @@ Created on Mon Nov 20 09:35:46 2017
 @author: kubo
 """
 
-from vortices import Vortex
-
+#from vortices import Vortex
+from scipy import interpolate
+import matplotlib.pyplot as plt
 import numpy as np
 
-"""
-testPositions = np.array([[x, x**2, 0] for x in range(10)])
-N = len(testPositions)
+# 3D example
+total_rad = 1
+z_factor = 3
+noise = 0.01
 
-# init
-testVortex = Vortex(testPositions)
+num_true_pts = 100
+s_true = np.linspace(0, total_rad, num_true_pts)
+x_true = np.cos(s_true)
+y_true = np.sin(s_true)
+z_true = 1
 
-# fixing neighbours for testline
-testVortex.segments[0]['backward'] = None
-testVortex.segments[N-1]['forward'] = None
+num_sample_pts = 5
+s_sample = np.linspace(0, total_rad, num_sample_pts)
+x_sample = np.cos(s_sample) + noise * np.random.randn(num_sample_pts)
+y_sample = np.sin(s_sample) + noise * np.random.randn(num_sample_pts)
+z_sample = s_sample/z_factor + noise * np.random.randn(num_sample_pts)
 
-# tests
-testVortex.addProperties()
-print(testVortex.segments)
-"""
-segments = np.random.rand(10)
-N = len(segments)
-new_segments = np.array(N)
-new_segments[0] = segments[0]
-segments = np.delete(segments, segments[0])
+tck, u = interpolate.splprep([x_sample,y_sample,z_sample], s=2)
+#x_knots, y_knots, z_knots = interpolate.splev(tck[0], tck)
+u_fine = np.linspace(0,1,num_true_pts)
+x_fine, y_fine, z_fine = interpolate.splev(u_fine, tck)
 
-for i in range(N-1):
-    focus_item = new_segments[i]
-    mindist = math.inf
-
-    for item in segments:
-        dist = np.linalg.norm(focus_item['coords'] - item['coords'])
-        if (dist < mindist):
-            mindist = dist
-            new_segments[i]['forward'] = np.asscalar(np.argwhere(segments==item))
-            new_segments[i+1] = item
-
-    segments = np.delete(segments, new_segments[i]['forward'])
+fig2 = plt.figure(2)
+ax3d = fig2.add_subplot(111, projection='3d')
+#ax3d.plot(x_true, y_true, z_true, 'b')
+ax3d.plot(x_sample, y_sample, z_sample, 'r*')
+#ax3d.plot(x_knots, y_knots, z_knots, 'go')
+ax3d.plot(x_fine, y_fine, z_fine, 'g')
+fig2.show()
