@@ -112,11 +112,16 @@ for i in range(iters):
                    label='ring',
                    color='blue')
 
+    # Check if ring is not too small
+    if (len(vortex.segments) < 10):
+        print("Vortex ring too small, deleting...")
+        break
+
     # Time evolution
     makeStep(vortex, dt, method="rk4")
     velocity = np.absolute(vortex.segments[0]['velocity_line'][0])
     #if (10000*velocity*dt > max_shift):
-    #    dt *= 1/2 
+    #    dt *= 1/2
     updateConnections(vortex)
     updateSegmentation(vortex, min_distance, max_distance)
     #min_distance = len(vortex.segments) / 2
