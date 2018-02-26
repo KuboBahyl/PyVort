@@ -160,14 +160,13 @@ def new_segmentation(vortex, dmin, dmax):
             segments = delete_item(segments, next_item['backward'])
 
             i-=1
-            item = go_backward(segments, item)
 
         elif (dist > dmax):
             #make local interpolation with line using 4 points
-            #new_point = spline3D(segments, item, next_item, "max_error")
+            new_point = spline3D(segments, item, next_item, "max_error")
 
             # add new segment along the distant ones
-            segments = np.append(segments, {'coords' : (item['coords'] + next_item['coords']) / 2,#new_point,
+            segments = np.append(segments, {'coords' : new_point,
                                             'backward' : next_item['backward'],
                                             'forward' : item['forward']})
 
