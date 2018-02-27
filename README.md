@@ -1,3 +1,5 @@
-# Script and Python materials used in Diploma thesis
+# Simulations of vortex dynamics in superfluid
 
-More info will be added soon..
+This manual leads user to successfully run all Python scripts and understand data.
+
+**TODO: documentation & purpose**

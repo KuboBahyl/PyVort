@@ -76,11 +76,11 @@ updateVelocities(vortex)
 print('Time evolution started...')
 
 # Time steps and steplength
-iters = 3
+iters = 1000
 dt=1e-2
 
-min_distance=0 #um
-max_distance=62.8 #um
+min_distance=50 #um
+max_distance=1000 #um
 max_shift = 2 #um
 
 velocities_real = []
@@ -90,12 +90,12 @@ fig = plt.figure()
 ax = fig.gca(projection='3d')
 
 # other parameters
-graphs = 3
-reports = 3
+graphs = 10
+reports = 50
 
 for i in range(iters):
 
-    if (i%round(iters/reports)==0):
+    if ((i+1)%round(iters/reports)==0):
         print('STARTING STEP {} with dt={}...'.format(i, dt))
 
         # Testing parameters
@@ -104,7 +104,7 @@ for i in range(iters):
         velocities_theor.append(vel_theor)
 
 
-    if (i%round(iters/graphs)==0):
+    if ((i+1)%round(iters/graphs)==0):
         # Plotting
         ax.scatter(vortex.getAllAxisCoords(0),
                    vortex.getAllAxisCoords(1),
@@ -120,11 +120,11 @@ for i in range(iters):
     # Time evolution
     makeStep(vortex, dt, method="rk4")
     velocity = np.absolute(vortex.segments[0]['velocity_line'][0])
-    #if (10000*velocity*dt > max_shift):
-    #    dt *= 1/2
+    if (10000*velocity*dt > max_shift):
+        dt *= 1/2
     updateConnections(vortex)
     updateSegmentation(vortex, min_distance, max_distance)
-    #min_distance = len(vortex.segments) / 2
+    min_distance = len(vortex.segments) / 2
     updateVelocities(vortex)
 
 
