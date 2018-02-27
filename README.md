@@ -1,5 +1,7 @@
 # Simulations of vortex dynamics in superfluid
 
-This manual leads user to successfully run all Python scripts and understand data.
+This manual should lead user to successfully run all the main Python script to create vortex tangle a watch its behaviour.
 
-**TODO: documentation & purpose**
+Run `src/main.py` to start simulation.
+
+**TODO: update documentation**
