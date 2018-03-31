@@ -7,23 +7,14 @@ Created on Wed Dec 20 17:28:51 2017
 """
 from scipy import interpolate
 from spline3D import spline3D
-
-import constants as c
 import numpy as np
 import math
 
+import constants as c
 import vandermonde
-
-rho = c.density_total
-rho_s = c.density_superfluid
-v_n = c.velocity_normal
-v_s = c.velocity_superfluid
 
 kappa = c.quantum_vorticity
 a = c.vortex_width
-
-alpha1 = c.alpha1_mutual
-alpha2 = c.alpha2_mutual
 
 def go_backward(segments, item):
     return segments[item['backward']]
@@ -68,20 +59,28 @@ def calc_velocity_LIA(item):
     v_lia = beta * np.cross(item['tangent'], item['curvature'])
     return v_lia
 
-def calc_velocity_drive(item):
+def calc_velocity_BIOT(vortex, item):
+    return np.array([0,0,0])
+
+def calc_velocity_drive(vortex, item):
+    v_n = np.array(vortex.env['velocity_normal'])
+    v_s = np.array(vortex.env['velocity_super'])
+
     v_ns = v_n - v_s
     v_lia = item['velocity_LIA']
+    alpha1, alpha2 = c.get_mutual_coeffs(vortex.env['temperature'])
 
     v_drive1 = np.cross(item['tangent'], v_ns - v_lia)
     v_drive2 = np.cross(item['tangent'], v_drive1)
     v_drive_full = alpha1*v_drive1 - alpha2*v_drive2
     return v_drive_full
 
-def calc_velocity_full(item):
-    v_full = item['velocity_LIA'] + v_s + item['velocity_drive']
+def calc_velocity_full(vortex, item):
+    v_s = np.array(vortex.env['velocity_super'])
+    v_full = v_s + item['velocity_LIA'] + item['velocity_BIOT'] + item['velocity_drive']
     return v_full
 
-def update_velocities(vortex):
+def update_segments(vortex):
     segments = vortex.segments
     for item in segments:
         if (item['backward'] and item['forward']) is not None:
@@ -98,10 +97,37 @@ def update_velocities(vortex):
 
                 # velocities
                 item['velocity_LIA'] = calc_velocity_LIA(item)
-                item['velocity_drive'] = calc_velocity_drive(item)
-                item['velocity_line'] = calc_velocity_full(item)
+                item['velocity_BIOT'] = calc_velocity_BIOT(vortex, item)
+                item['velocity_drive'] = calc_velocity_drive(vortex, item)
+                item['velocity_full'] = calc_velocity_full(vortex, item)
 
-# TODO new everything
+def update_vortex(vortex):
+    center, radius, velocity, length = np.zeros(4)
+    N = vortex.N
+    ind = ["x", "y", "z"].index(vortex.shape['direction'])
+    other = np.delete(np.array([0,1,2]), ind)
+
+    segmin = np.inf
+    segmax = 0
+
+    for item in vortex.segments:
+        if item['forward'] is not None:
+            center += item['coords'][ind] / N
+            radius += np.sqrt(item['coords'][other[0]]**2 + item['coords'][other[1]]**2) / N
+            velocity += item['velocity_full'][ind] / N
+
+            nextItem = vortex.segments[item['forward']]
+            segdist = np.linalg.norm(item['coords'] - nextItem['coords'])
+            segmin = segdist if (segdist < segmin) else segmin
+            segmax = segdist if (segdist > segmax) else segmax
+            length += segdist
+
+    vortex.shape['center'][ind] = center
+    vortex.shape['radius'] = radius
+    vortex.velocity = velocity
+
+    return center, radius, velocity, segmin, segmax, length
+
 def new_connections(vortex):
     pass
     """
@@ -125,8 +151,6 @@ def new_connections(vortex):
 
     return new_segments
     """
-
-
 
 def new_segmentation(vortex, dmin, dmax):
 # assumes that indices are already assigned

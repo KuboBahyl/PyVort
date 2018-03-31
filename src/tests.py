@@ -7,59 +7,38 @@ Created on Thu Nov 23 03:26:07 2017
 """
 import numpy as np
 import constants as c
+from properties import update_vortex
 
 kappa = 100 * c.quantum_vorticity # to mm^2/s
 a = 10 * c.vortex_width # to mm
 
 ### Some of the tests are very specific for ring object
 
-def calc_testprops(segments):
-        distX, radius, length, centerX, velocityX = np.zeros(5)
-        N = len(segments)
-
-        segmin = np.inf
-        segmax = 0
-
-        for item in segments:
-            if item['forward'] is not None:
-                distX += item['coords'][0] / N
-                radius += np.sqrt(item['coords'][1]**2 + item['coords'][2]**2) / N
-                velocityX += item['velocity_line'][0] / N
-
-                nextItem = segments[item['forward']]
-                segdist = np.linalg.norm(item['coords'] - nextItem['coords'])
-                segmin = segdist if (segdist < segmin) else segmin
-                segmax = segdist if (segdist > segmax) else segmax
-                length += segdist
-
-        return 10*distX, 10*radius, 10000*velocityX, 10000*segmin, 10000*segmax, length
+def calc_velocity_ring(vortex):
+    radius = vortex.shape['radius']
+    return kappa / (4*np.pi*radius) * (np.log(8*radius/a) - 1) # in um/s
 
 def calc_error(theor, real):
     return 100*(real - theor) / theor
 
-def do_statistics(vortex, radius):
-    distX, radReal, velX, segmin, segmax, lenReal = calc_testprops(vortex.segments)
+def print_statistics(vortex):
+    center, radius, velocity, segmin, segmax, length = update_vortex(vortex)
 
-    radErr = calc_error(10*radius, radReal)
+    velocity_theor = calc_velocity_ring(vortex)
 
-    velTheor = 1000 * kappa / (4*np.pi*radReal) * (np.log(8*radReal/a) - 1/2) # in um/s
-    #velErr = calc_error(velTheor, velX)
+    length_theor = 2*np.pi*radius
+    lenErr = calc_error(length_theor, length)
 
-    lenTheor = 2*np.pi*radius
-    lenErr = calc_error(lenTheor, lenReal)
-
-    print('Number of segments: {}'.format(len(vortex.segments)))
-    print('Min and max segment distance: {}um, {}um'.format(round(segmin, 2), round(segmax, 2)))
-    print('Radius: {}mm, decreased by: {}%'.format(round(radReal, 2), round(radErr, 2)))
-    print('Center x-shift: {}mm'.format(round(distX,2)))
-    print('Velocity x: {}um/s'.format(round(velX, 2)))
-    print('Velocity x theor: -{}um/s'.format(round(velTheor, 2)))
+    print('Number of segments: {}'.format(vortex.N))
+    print('Min and max segment distance: {}um, {}um'.format(round(10**4*segmin, 2), round(10**4*segmax, 2)))
+    print('Center {}-shift: {}mm'.format(vortex.shape['direction'], round(10*center,2)))
+    print('Radius: {}mm'.format(round(10*radius, 2)))
+    print('Velocity {}-real: {}mm/s'.format(vortex.shape['direction'], round(10**velocity, 2)))
+    print('Velocity {}-theor: {}mm/s'.format(vortex.shape['direction'], round(10**velocity_theor, 2)))
     print('Vortex length error: {}%'.format(round(lenErr, 2)))
     print('....................')
 
-    return np.absolute(velX), velTheor
-
-def test_indices(segments):
-    for j in range(len(segments)):
+def test_indices(vortex):
+    for j in range(len(vortex.segments)):
         seg = segments[j]
         print("ind {}, back {}, forw {}".format(j, seg['backward'],seg['forward']))

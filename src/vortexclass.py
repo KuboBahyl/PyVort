@@ -23,7 +23,9 @@ class Vortex(object):
     """
 
     # basic neighbour init
-    def __init__(self, coords):
+    def __init__(self, shape, coords, env):
+        self.shape = shape
+        self.velocity = 0
         self.N = len(coords)
         self.segments = np.array([
                 {'coords' : coords[i],
@@ -32,10 +34,12 @@ class Vortex(object):
                  'tangent' : None,
                  'curvature' : None,
                  'velocity_LIA' : None,
+                 'velocity_BIOT': None,
                  'velocity_drive' : None,
-                 'velocity_line' : None}
-                for i in range(self.N)
+                 'velocity_full' : None}
+                 for i in range(self.N)
                 ])
+        self.env = env # static
 
     def __repr__(self):
         return 'Quantum Vortex object. Check documentation for available methods.'
@@ -45,21 +49,12 @@ class Vortex(object):
 ### USER'S OPTIONS
 ######################################
 
-    def addSegment_Dumb(self, back, forw, coords):
-        new_index = len(self.segments)
-        self.segments = np.append(self.segments,
-                                  {'coords' : coords,
-                                   'backward' : back,
-                                   'forward' : forw})
-        self.segments[back]['forward'] = new_index
-        self.segments[forw]['backward'] = new_index
-
     def getAllCoords(self, index):
         return [self.segments[i]['coords']
                 for i in range(len(self.segments))]
 
     def getAllAxisCoords(self, axis):
-        return [self.segments[i]['coords'][axis]
+        return [10**4*self.segments[i]['coords'][axis]
                 for i  in range(len(self.segments))]
 
 """

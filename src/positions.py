@@ -9,8 +9,10 @@
 """
 import numpy as np
 
-def create_ring(N, center, radius, direction):
-    center = np.array(center)
+def create_ring(shape, N):
+    center = np.array(shape['center'])
+    radius = shape['radius']
+    direction = shape['direction']
     step = 2*np.pi/N
 
     if (direction == "x"):
