@@ -60,7 +60,23 @@ def calc_velocity_LIA(item):
     return v_lia
 
 def calc_velocity_BIOT(vortex, item):
-    return np.array([0,0,0])
+    segments = vortex.segments
+    velocity_biot = np.zeros(3)
+
+    for other_item in segments:
+        next_item = go_forward(segments, other_item)
+        if (other_item['forward'] != item['forward'] and next_item['forward'] != item['forward']):
+            R_this = other_item['coords'] - item['coords']
+            R_next = next_item['coords'] - item['coords']
+            R_this_len = np.linalg.norm(R_this)
+            R_next_len = np.linalg.norm(R_next)
+
+            first_term = (R_this_len + R_next_len) / (R_this_len * R_next_len)
+            second_term = np.cross(R_this, R_next) / (R_this_len * R_next_len + np.dot(R_this, R_next))
+
+            velocity_biot += (kappa / 4*np.pi) * first_term * second_term
+
+    return velocity_biot
 
 def calc_velocity_drive(vortex, item):
     v_n = np.array(vortex.env['velocity_normal'])
@@ -83,23 +99,20 @@ def calc_velocity_full(vortex, item):
 def update_segments(vortex):
     segments = vortex.segments
     for item in segments:
-        if (item['backward'] and item['forward']) is not None:
-            if (go_backward(segments, item)['backward'] and go_forward(segments, item)['forward']) is not None:
+        # derivatives
+        item['tangent'] = calc_derivative(segments, item)
+        item['curvature'] = calc_derivative(segments, item, order=2)
 
-                # derivatives
-                item['tangent'] = calc_derivative(segments, item)
-                item['curvature'] = calc_derivative(segments, item, order=2)
+        # normalisation
+        norm = np.linalg.norm(item['tangent'])
+        item['tangent'] /= norm
+        item['curvature'] /= norm**2 # maybe not so useful
 
-                # normalisation
-                norm = np.linalg.norm(item['tangent'])
-                item['tangent'] /= norm
-                item['curvature'] /= norm**2 # maybe not so useful
-
-                # velocities
-                item['velocity_LIA'] = calc_velocity_LIA(item)
-                item['velocity_BIOT'] = calc_velocity_BIOT(vortex, item)
-                item['velocity_drive'] = calc_velocity_drive(vortex, item)
-                item['velocity_full'] = calc_velocity_full(vortex, item)
+        # velocities
+        item['velocity_LIA'] = calc_velocity_LIA(item)
+        item['velocity_BIOT'] = calc_velocity_BIOT(vortex, item)
+        item['velocity_drive'] = calc_velocity_drive(vortex, item)
+        item['velocity_full'] = calc_velocity_full(vortex, item)
 
 def update_vortex(vortex):
     center, radius, velocity, length = np.zeros(4)
@@ -111,16 +124,15 @@ def update_vortex(vortex):
     segmax = 0
 
     for item in vortex.segments:
-        if item['forward'] is not None:
-            center += item['coords'][ind] / N
-            radius += np.sqrt(item['coords'][other[0]]**2 + item['coords'][other[1]]**2) / N
-            velocity += item['velocity_full'][ind] / N
+        center += item['coords'][ind] / N
+        radius += np.sqrt(item['coords'][other[0]]**2 + item['coords'][other[1]]**2) / N
+        velocity += item['velocity_full'][ind] / N
 
-            nextItem = vortex.segments[item['forward']]
-            segdist = np.linalg.norm(item['coords'] - nextItem['coords'])
-            segmin = segdist if (segdist < segmin) else segmin
-            segmax = segdist if (segdist > segmax) else segmax
-            length += segdist
+        nextItem = vortex.segments[item['forward']]
+        segdist = np.linalg.norm(item['coords'] - nextItem['coords'])
+        segmin = segdist if (segdist < segmin) else segmin
+        segmax = segdist if (segdist > segmax) else segmax
+        length += segdist
 
     vortex.shape['center'][ind] = center
     vortex.shape['radius'] = radius

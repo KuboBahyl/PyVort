@@ -28,9 +28,9 @@ min_seg_distance=50 #um
 max_seg_distance=100 #um
 
 # Output parameters
-max_plot_shift = 2 #um
-graphs = 5
-reports = 5
+max_plot_shift = 5 #um
+graphs = 10
+reports = 10
 
 ###################################################
 ###   IMPORTS   ###
@@ -92,6 +92,10 @@ plt.title('Ring motion')
 
 for i in range(iters):
 
+    # change dt
+    if (10000*vortex.velocity*dt > max_plot_shift):
+        dt *= 1/2
+
     # REPORT
     if ((i+1)%round(iters/reports)==0):
         print('STARTING STEP {} with dt={}...'.format(i, dt))
@@ -125,10 +129,6 @@ for i in range(iters):
 
     # TIME EVOLUTION
     make_step(method, vortex, dt)
-
-    # change dt
-    if (10000*vortex.velocity*dt > max_plot_shift):
-        dt *= 1/2
 
     # new connections
     new_connections(vortex) # TODO
