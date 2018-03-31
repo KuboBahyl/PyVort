@@ -31,24 +31,22 @@ def delete_item(segments, itemindex_to_delete):
             item['backward'] -= 1
     return segments
 
-def calc_derivative(segments, item, order=1, radius=2):
+def calc_derivative(segments, item, order=1):
     # start with the first item in range
-    for n in range(radius):
-        item = go_backward(segments, item)
-    firstItem = item
+    firstItem = go_backward(segments, go_backward(segments, item))
 
     # extract coords from each item
     neighCoords = []
     thisItem = firstItem
-    for i in range(2*radius+1):
+    for i in range(5):
         neighCoords.append(thisItem['coords'])
         thisItem = go_forward(segments, thisItem)
 
     # calculate coeffs for numeric derivative
     try:
-        coeffs = vandermonde.calc_FDcoeffs_inverse(neighCoords, order, radius)
+        coeffs = vandermonde.calc_FDcoeffs_inverse(neighCoords, order)
     except:
-        coeffs = vandermonde.calc_FDcoeffs_closed(neighCoords, order, radius)
+        coeffs = vandermonde.calc_FDcoeffs_closed(neighCoords, order)
 
     derivative = coeffs.dot(neighCoords)
     return derivative

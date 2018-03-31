@@ -40,14 +40,12 @@ reports = 10
 import numpy as np
 from mpl_toolkits.mplot3d import Axes3D
 import matplotlib.pyplot as plt
+from tqdm import tqdm
 
 # Dependencies
-import constants as c
 from positions import create_ring
 from vortexclass import Vortex as createVortex
-from properties import new_segmentation
-from properties import new_connections
-from properties import update_segments
+from properties import new_segmentation, new_connections, update_segments
 from tests import calc_velocity_ring, print_statistics
 from run import make_step
 
@@ -90,7 +88,7 @@ fig = plt.figure()
 ax = fig.gca(projection='3d')
 plt.title('Ring motion')
 
-for i in range(iters):
+for i in tqdm(range(iters)):
 
     # change dt
     if (10000*vortex.velocity*dt > max_plot_shift):

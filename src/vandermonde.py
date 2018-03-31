@@ -6,13 +6,12 @@ import numpy as np
 # solving M*coeffs = b
 # Finite difference coefficients using 2 neighbours on each side
 
-def calc_FDcoeffs_inverse(coords, order, radius):
+def calc_FDcoeffs_inverse(coords, order):
 
     # works for order from 1 to 4
-    center = radius
-    l1, l2, l3, l4 = [np.linalg.norm(coords[n] - coords[center])
-                          for n in range(2*radius+1)
-                          if n != center]
+    l1, l2, l3, l4 = [np.linalg.norm(coords[n] - coords[2])
+                          for n in range(5)
+                          if n != 2]
     Taylor = np.array([ [1,1,1,1,1],
                         [-1,-1,0,1,1],
                         [1/2,1/2,0,1/2,1/2],
@@ -35,10 +34,10 @@ def calc_FDcoeffs_inverse(coords, order, radius):
     coeffs = np.linalg.pinv(M).dot(b)
     return coeffs
 
-def calc_FDcoeffs_closed(coords, order, radius):
+def calc_FDcoeffs_closed(coords, order):
     # works for orders only 1 and 2
     l1, l2, l3, l4 = [np.linalg.norm(coords[n] - coords[n+1])
-                  for n in range(2*radius)]
+                  for n in range(4)]
 
     if (order == 1):
         A = (l2*l3**2 + l2*l3*l4) / (l1*(l1+l2) * (l1+l2+l3) * (l1+l2+l3+l4))
