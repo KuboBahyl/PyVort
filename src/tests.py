@@ -8,8 +8,8 @@ Created on Thu Nov 23 03:26:07 2017
 import numpy as np
 import constants as c
 
-kappa = 100 * c.quantum_vorticity
-a = 10 * c.vortex_width
+kappa = 100 * c.quantum_vorticity # to mm^2/s
+a = 10 * c.vortex_width # to mm
 
 ### Some of the tests are very specific for ring object
 

@@ -1,0 +1,17 @@
+Meeting 16.jan.2018
+
+Performance:
+	- bigger instability with rk4
+
+Theory:
+	- meaning of fd, fm - line density of force?
+	- how s, s' and s'xs'' can be orthogonal
+	- where to look for derivations
+	- limitations of LIA (just Taylor)
+	- derivation of ds/dt: fm=fd why?
+
+Simulations:
+	- temperature=0, quantum=False -> why not stable?
+	- When turn off s'' norm, errors are smaller
+
+Meeting 19.jan.2018

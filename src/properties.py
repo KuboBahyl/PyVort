@@ -81,7 +81,7 @@ def calc_velocity_full(item):
     v_full = item['velocity_LIA'] + v_s + item['velocity_drive']
     return v_full
 
-def add_properties(vortex):
+def update_velocities(vortex):
     segments = vortex.segments
     for item in segments:
         if (item['backward'] and item['forward']) is not None:
