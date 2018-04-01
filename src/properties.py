@@ -10,6 +10,7 @@ from spline3D import spline3D
 import numpy as np
 import math
 
+from config import Config as cf
 import constants as c
 import vandermonde
 
@@ -51,9 +52,19 @@ def calc_derivative(segments, item, order=1):
     derivative = coeffs.dot(neighCoords)
     return derivative
 
-def calc_velocity_LIA(item):
-    r = 1 / np.linalg.norm(item['curvature'])
-    beta = kappa * np.log(r/a) / (4*np.pi)
+def calc_velocity_LIA(vortex, item):
+    if cf.BIOT:
+        item_prev = go_backward(vortex.segments, item)
+        item_next = go_forward(vortex.segments, item)
+        len_prev = np.linalg.norm(item_prev['coords'] - item['coords'])
+        len_next = np.linalg.norm(item_next['coords'] - item['coords'])
+
+        log_term = 2 * np.sqrt(len_prev * len_next) / (a * np.e)
+        beta = kappa * np.log(log_term) / (4*np.pi)
+    else:
+        r = 1 / np.linalg.norm(item['curvature'])
+        beta = kappa * np.log(2*r/a) / (4*np.pi)
+
     v_lia = beta * np.cross(item['tangent'], item['curvature'])
     return v_lia
 
@@ -77,20 +88,20 @@ def calc_velocity_BIOT(vortex, item):
     return velocity_biot
 
 def calc_velocity_drive(vortex, item):
-    v_n = np.array(vortex.env['velocity_normal'])
-    v_s = np.array(vortex.env['velocity_super'])
+    v_n = np.array(cf.velocity_normal_ext)
+    v_s = np.array(cf.velocity_super_ext)
 
     v_ns = v_n - v_s
-    v_lia = item['velocity_LIA']
-    alpha1, alpha2 = c.get_mutual_coeffs(vortex.env['temperature'])
+    v_i = item['velocity_LIA'] + item['velocity_BIOT']
+    alpha1, alpha2 = c.get_mutual_coeffs(cf.temperature)
 
-    v_drive1 = np.cross(item['tangent'], v_ns - v_lia)
+    v_drive1 = np.cross(item['tangent'], v_ns - v_i)
     v_drive2 = np.cross(item['tangent'], v_drive1)
     v_drive_full = alpha1*v_drive1 - alpha2*v_drive2
     return v_drive_full
 
 def calc_velocity_full(vortex, item):
-    v_s = np.array(vortex.env['velocity_super'])
+    v_s = np.array(cf.velocity_super_ext)
     v_full = v_s + item['velocity_LIA'] + item['velocity_BIOT'] + item['velocity_drive']
     return v_full
 
@@ -98,7 +109,7 @@ def update_segments(vortex):
     segments = vortex.segments
     for item in segments:
         # derivatives
-        item['tangent'] = calc_derivative(segments, item)
+        item['tangent'] = calc_derivative(segments, item, order=1)
         item['curvature'] = calc_derivative(segments, item, order=2)
 
         # normalisation
@@ -107,9 +118,11 @@ def update_segments(vortex):
         item['curvature'] /= norm**2 # maybe not so useful
 
         # velocities
-        item['velocity_LIA'] = calc_velocity_LIA(item)
-        item['velocity_BIOT'] = calc_velocity_BIOT(vortex, item)
-        item['velocity_drive'] = calc_velocity_drive(vortex, item)
+        item['velocity_LIA'] = calc_velocity_LIA(vortex, item)
+        if cf.BIOT:
+            item['velocity_BIOT'] = calc_velocity_BIOT(vortex, item)
+        if cf.Quantum:
+            item['velocity_drive'] = calc_velocity_drive(vortex, item)
         item['velocity_full'] = calc_velocity_full(vortex, item)
 
 def update_vortex(vortex):
@@ -177,7 +190,7 @@ def new_segmentation(vortex, dmin, dmax):
 
         if (dist < dmin):
             #make local interpolation with line using 4 points
-            new_point = spline3D(segments, item, next_item, "min_error")
+            new_point = spline3D(segments, item, next_item, "nearest")
 
             # add new segment and remove the close ones
             segments = np.append(segments, {'coords' :  new_point,
@@ -197,7 +210,7 @@ def new_segmentation(vortex, dmin, dmax):
 
         elif (dist > dmax):
             #make local interpolation with line using 4 points
-            new_point = spline3D(segments, item, next_item, "max_error")
+            new_point = spline3D(segments, item, next_item, "every_second")
 
             # add new segment along the distant ones
             segments = np.append(segments, {'coords' : new_point,

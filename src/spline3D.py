@@ -5,14 +5,14 @@ import numpy as np
 def spline3D(segments, item, next_item, type):
     knots = 4
 
-    if (type=="min_error"):
+    if (type=="nearest"):
         first_item = properties.go_backward(segments, item)
         next_next_item = properties.go_forward(segments, next_item)
 
-    if (type=="max_error"):
+    if (type=="every_second"):
         first_item = properties.go_backward(segments, properties.go_backward(segments, item))
         next_next_item = properties.go_forward(segments, properties.go_forward(segments, next_item))
-        
+
     else:
         raise NameError("wrong type in spline3D")
 

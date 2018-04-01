@@ -3,35 +3,6 @@
 Here is performed the main loop of simulation.
 To clear all data, execute `%reset` in ipython console
 """
-######################
-### USER'S OPTIONS ###
-###################################################
-
-# Environment parameters
-temperature = 1.5 # K
-velocity_normal_ext = [0,0,0]
-velocity_super_ext = [0,0,0]
-
-# Vortex ring parameters
-center = [0,0,0]
-radius = 0.1 #cm = 1000um
-direction = "x"
-
-# Simulation parameters
-num_segments = 100
-iters = 10
-dt=1e-2
-method = "RK4"
-
-# Hyper-parametes
-min_seg_distance=50 #um
-max_seg_distance=100 #um
-
-# Output parameters
-max_plot_shift = 5 #um
-graphs = 10
-reports = 10
-
 ###################################################
 ###   IMPORTS   ###
 ###################
@@ -43,6 +14,7 @@ import matplotlib.pyplot as plt
 from tqdm import tqdm
 
 # Dependencies
+from config import Config as cf
 from positions import create_ring
 from vortexclass import Vortex as createVortex
 from properties import new_segmentation, new_connections, update_segments
@@ -54,23 +26,19 @@ from run import make_step
 ###########################
 
 # Initial position
-print('Initialising vortex ring of radius: {}mm and inter-segment distance: {}um...\n'.format(10*radius, round(10**4 * 2*np.pi*radius/num_segments, 2)))
+print('Initialising vortex ring of radius: {}mm and inter-segment distance: {}um...\n'.format(10*cf.radius, round(10**4 * 2*np.pi*cf.radius/cf.num_segments, 2)))
 
-shape = {'center': center,
-         'radius': radius,
-         'direction': direction}
-
-env = {'temperature': temperature,
-       'velocity_normal': velocity_normal_ext,
-       'velocity_super': velocity_super_ext}
+shape = {'center': cf.center,
+         'radius': cf.radius,
+         'direction': cf.direction}
 
 # Coords init
-coords = create_ring(shape, num_segments)
+coords = create_ring(shape, cf.num_segments)
 # Vortex init
-vortex = createVortex(shape, coords, env)
+vortex = createVortex(shape, coords)
 # Fixing boundary neighbours
-vortex.segments[0]['backward'] = num_segments - 1
-vortex.segments[num_segments-1]['forward'] = 0
+vortex.segments[0]['backward'] = cf.num_segments - 1
+vortex.segments[cf.num_segments-1]['forward'] = 0
 # Filling segment properties - tangent, curvature, velocities
 update_segments(vortex)
 
@@ -88,17 +56,15 @@ fig = plt.figure()
 ax = fig.gca(projection='3d')
 plt.title('Ring motion')
 
-for i in tqdm(range(iters)):
+for i in tqdm(range(cf.iters)):
 
     # change dt
-    if (10000*vortex.velocity*dt > max_plot_shift):
-        dt *= 1/2
+    if (10000*vortex.velocity*cf.dt > cf.max_plot_shift):
+        cf.dt *= 1/2
 
     # REPORT
-    if ((i+1)%round(iters/reports)==0):
-        print('STARTING STEP {} with dt={}...'.format(i, dt))
-
-
+    if ((i+1)%round(cf.iters/cf.reports)==0):
+        print('STARTING STEP {} with dt={}...'.format(i, cf.dt))
         print_statistics(vortex)
 
         velocity_real = vortex.velocity
@@ -109,12 +75,12 @@ for i in tqdm(range(iters)):
         velocities_theor.append(velocity_theory)
 
     # VISUALISATION
-    if ((i+1)%round(iters/graphs)==0):
-        ax.scatter(vortex.getAllAxisCoords(0),
-                   vortex.getAllAxisCoords(1),
-                   vortex.getAllAxisCoords(2),
-                   label='ring')#,
-                   #color='blue')
+    if ((i+1)%round(cf.iters/cf.graphs)==0):
+        ax.plot(vortex.getAllAxisCoords(0),
+                vortex.getAllAxisCoords(1),
+                vortex.getAllAxisCoords(2),
+                label='ring',
+                color='blue')
         ax.set_xlabel('x[$\mu$m]')
         ax.set_ylabel('y[$\mu$m]')
         ax.set_zlabel('z[$\mu$m]')
@@ -126,13 +92,13 @@ for i in tqdm(range(iters)):
         break
 
     # TIME EVOLUTION
-    make_step(method, vortex, dt)
+    make_step(cf.method, vortex, cf.dt)
 
     # new connections
     new_connections(vortex) # TODO
 
     # new segments
-    new_segmentation(vortex, min_seg_distance, max_seg_distance)
+    new_segmentation(vortex, cf.min_seg_distance, cf.max_seg_distance)
     vortex.N = len(vortex.segments)
 
     #min_seg_distance = vortex.N / 2
@@ -146,4 +112,4 @@ plt.scatter(steps, velocities_real, label="Simulation")
 plt.scatter(steps, velocities_theor, label="Theory")
 plt.legend(loc=2)
 plt.title('Velocity evolution')
-#plt.show()
+plt.show()

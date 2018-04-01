@@ -23,7 +23,7 @@ class Vortex(object):
     """
 
     # basic neighbour init
-    def __init__(self, shape, coords, env):
+    def __init__(self, shape, coords):
         self.shape = shape
         self.velocity = 0
         self.N = len(coords)
@@ -33,13 +33,12 @@ class Vortex(object):
                  'forward' : i+1,
                  'tangent' : None,
                  'curvature' : None,
-                 'velocity_LIA' : None,
-                 'velocity_BIOT': None,
-                 'velocity_drive' : None,
-                 'velocity_full' : None}
+                 'velocity_LIA' : np.zeros(3),
+                 'velocity_BIOT': np.zeros(3),
+                 'velocity_drive' : np.zeros(3),
+                 'velocity_full' : np.zeros(3)}
                  for i in range(self.N)
                 ])
-        self.env = env # static
 
     def __repr__(self):
         return 'Quantum Vortex object. Check documentation for available methods.'
