@@ -32,7 +32,7 @@ def delete_item(segments, itemindex_to_delete):
             item['backward'] -= 1
     return segments
 
-def calc_derivative(segments, item, order=1):
+def calc_derivative(segments, item, order=1, neighbours=4):
     # start with the first item in range
     firstItem = go_backward(segments, go_backward(segments, item))
 
@@ -44,10 +44,14 @@ def calc_derivative(segments, item, order=1):
         thisItem = go_forward(segments, thisItem)
 
     # calculate coeffs for numeric derivative
-    try:
-        coeffs = finitediffs.calc_FDcoeffs_inverse(neighCoords, order)
-    except:
+    if (neighbours==4):
         coeffs = finitediffs.calc_FDcoeffs_closed(neighCoords, order)
+    elif (neighbours>4):
+        try:
+            coeffs = finitediffs.calc_FDcoeffs_inverse(neighCoords, order)
+        except:
+            coeffs = finitediffs.calc_FDcoeffs_approx(neighCoords, order)
+
 
     derivative = coeffs.dot(neighCoords)
     return derivative

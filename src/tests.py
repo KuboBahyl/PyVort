@@ -19,7 +19,7 @@ def calc_energy_ring(vortex):
     rho_tot, rho_s = c.get_densities(cf.temperature)
     radius = vortex.shape['radius']
     E = kappa**2 * rho_tot * radius * (np.log(8*radius/a) - 2) / 2 # g cm / s^2
-    E_scalled = E / (1000 * 100 * 1.6 * 1e-19)
+    E_scalled = E / (1000 * 100 * 1.6 * 1e-19) # ev
     return E_scalled
 
 def calc_error(real, theor):

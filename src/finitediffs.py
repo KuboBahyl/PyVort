@@ -54,3 +54,6 @@ def calc_FDcoeffs_closed(coords, order):
         C = -(A+B+D+E)
 
     return np.array([A,B,C,D,E])
+
+def calc_FDcoeffs_approx(coords, order):
+    pass
