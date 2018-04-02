@@ -18,10 +18,10 @@ def calc_error(real, theor):
     return 100*(real - theor) / theor
 
 def print_statistics(vortex):
-    center, radius, velocity, segmin, segmax, length = update_vortex(vortex)
+    center, radius, segmin, segmax, length = update_vortex(vortex)
 
 
-    velocity = vortex.segments[0]['velocity_full'][0]
+    velocity = vortex.velocity
     velocity_theor = calc_velocity_ring(vortex)
 
     length_theor = 2*np.pi*radius
@@ -30,7 +30,7 @@ def print_statistics(vortex):
 
     print('Number of segments: {}'.format(vortex.N))
     print('Min and max segment distance: {}um, {}um'.format(round(10**4*segmin, 2), round(10**4*segmax, 2)))
-    print('Center {}-shift: {}mm'.format(vortex.shape['direction'], round(10*center,2)))
+    print('Center {}-shift: {}um'.format(vortex.shape['direction'], round(10**4*center,2)))
     print('Radius: {}mm'.format(round(10*radius, 2)))
     print('Velocity {}-real: {}um/s'.format(vortex.shape['direction'], round(10**4*velocity, 2)))
     print('Velocity {}-theor: {}um/s'.format(vortex.shape['direction'], round(10**4*velocity_theor, 2)))

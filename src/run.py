@@ -9,6 +9,15 @@ import numpy as np
 import copy as cp
 from properties import update_segments
 
+def change_step(vortex, dt, max_shift):
+    max_shift /= 10**4
+    next_step = vortex.velocity * dt
+    if (next_step > max_shift):
+        dt = max_shift / vortex.velocity
+        return dt
+
+    return dt
+
 def make_step(method, vortex, dt):
     if method=="euler":
         return euler_step(vortex, dt)

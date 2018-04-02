@@ -19,7 +19,7 @@ from positions import create_ring
 from vortexclass import Vortex as createVortex
 from properties import new_segmentation, new_connections, update_segments
 from tests import calc_velocity_ring, print_statistics
-from run import make_step
+from run import make_step, change_step
 
 ###########################
 ###   VORTEX CREATION   ###
@@ -52,15 +52,15 @@ steps = []
 velocities_real = []
 velocities_theor = []
 
-fig = plt.figure()
-ax = fig.gca(projection='3d')
-plt.title('Ring motion')
+if cf.plot_segments:
+    fig = plt.figure()
+    ax = fig.gca(projection='3d')
+    plt.title(cf.plot_segments_name)
 
 for i in tqdm(range(cf.iters)):
 
     # change dt
-    if (10000*vortex.velocity*cf.dt > cf.max_plot_shift):
-        cf.dt *= 1/2
+    cf.dt = change_step(vortex, cf.dt, cf.max_shift)
 
     # REPORT
     if ((i+1)%round(cf.iters/cf.reports)==0):
@@ -75,16 +75,18 @@ for i in tqdm(range(cf.iters)):
         velocities_theor.append(velocity_theory)
 
     # VISUALISATION
-    if ((i+1)%round(cf.iters/cf.graphs)==0):
-        ax.plot(vortex.getAllAxisCoords(0),
-                vortex.getAllAxisCoords(1),
-                vortex.getAllAxisCoords(2),
-                label='ring',
-                color='blue')
-        ax.set_xlabel('x[$\mu$m]')
-        ax.set_ylabel('y[$\mu$m]')
-        ax.set_zlabel('z[$\mu$m]')
-        #plt.savefig('screens/step_'+str(i)+'.png')
+    if cf.plot_segments:
+        if ((i+1)%round(cf.iters/cf.graphs)==0):
+            ax.scatter(vortex.getAllAxisCoords(0),
+                    vortex.getAllAxisCoords(1),
+                    vortex.getAllAxisCoords(2),
+                    label='ring')
+                    #color='blue')
+            ax.set_xlabel('x[$\mu$m]')
+            ax.set_ylabel('y[$\mu$m]')
+            ax.set_zlabel('z[$\mu$m]')
+            if cf.plot_segments_save:
+                plt.savefig('screens/step_'+str(i)+'.png')
 
     # KILL SMALL RINGS
     if (len(vortex.segments) < 10):
@@ -104,12 +106,16 @@ for i in tqdm(range(cf.iters)):
     #min_seg_distance = vortex.N / 2
     update_segments(vortex)
 
-plt.show()
+if cf.plot_segments:
+    plt.show()
 
 # Velocity evolution
-plt.figure()
-plt.scatter(steps, velocities_real, label="Simulation")
-plt.scatter(steps, velocities_theor, label="Theory")
-plt.legend(loc=2)
-plt.title('Velocity evolution')
-plt.show()
+if cf.plot_velocities:
+    plt.figure()
+    plt.scatter(steps, velocities_real, label="Simulation")
+    plt.scatter(steps, velocities_theor, label="Theory")
+    plt.legend(loc=2)
+    plt.title(cf.plot_velocities_name)
+    plt.show()
+    if cf.plot_segments_save:
+        plt.savefig('screens/step_'+str(i)+'.png')

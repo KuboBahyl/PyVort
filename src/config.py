@@ -16,12 +16,18 @@ class Config:
     dt=1e-2
     method = "RK4"
 
-    # Hyper-parametes
+    # Hyper-parameters
     BIOT = False
-    min_seg_distance=50 #um
-    max_seg_distance=100 #um
+    min_seg_distance=20 #um
+    max_seg_distance=200 #um
+    max_shift = 5 #um
 
     # Output parameters
-    max_plot_shift = 5 #um
+    plot_segments = True
+    plot_segments_name = "Example of ring motion"
+    plot_segments_save = False
+    plot_velocities = False
+    plot_velocities_name = "Example of velocities"
+    plot_velocities_save = False
     graphs = 10
     reports = 10

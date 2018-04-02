@@ -12,7 +12,7 @@ import math
 
 from config import Config as cf
 import constants as c
-import vandermonde
+import finitediffs
 
 kappa = c.quantum_vorticity
 a = c.vortex_width
@@ -45,9 +45,9 @@ def calc_derivative(segments, item, order=1):
 
     # calculate coeffs for numeric derivative
     try:
-        coeffs = vandermonde.calc_FDcoeffs_inverse(neighCoords, order)
+        coeffs = finitediffs.calc_FDcoeffs_inverse(neighCoords, order)
     except:
-        coeffs = vandermonde.calc_FDcoeffs_closed(neighCoords, order)
+        coeffs = finitediffs.calc_FDcoeffs_closed(neighCoords, order)
 
     derivative = coeffs.dot(neighCoords)
     return derivative
@@ -107,6 +107,10 @@ def calc_velocity_full(vortex, item):
 
 def update_segments(vortex):
     segments = vortex.segments
+    ind = ["x", "y", "z"].index(vortex.shape['direction'])
+    N = vortex.N
+    vortex.velocity = 0
+
     for item in segments:
         # derivatives
         item['tangent'] = calc_derivative(segments, item, order=1)
@@ -124,6 +128,7 @@ def update_segments(vortex):
         if cf.Quantum:
             item['velocity_drive'] = calc_velocity_drive(vortex, item)
         item['velocity_full'] = calc_velocity_full(vortex, item)
+        vortex.velocity += item['velocity_full'][ind] / N
 
 def update_vortex(vortex):
     center, radius, velocity, length = np.zeros(4)
@@ -137,7 +142,6 @@ def update_vortex(vortex):
     for item in vortex.segments:
         center += item['coords'][ind] / N
         radius += np.sqrt(item['coords'][other[0]]**2 + item['coords'][other[1]]**2) / N
-        velocity += item['velocity_full'][ind] / N
 
         nextItem = vortex.segments[item['forward']]
         segdist = np.linalg.norm(item['coords'] - nextItem['coords'])
@@ -147,9 +151,8 @@ def update_vortex(vortex):
 
     vortex.shape['center'][ind] = center
     vortex.shape['radius'] = radius
-    vortex.velocity = velocity
 
-    return center, radius, velocity, segmin, segmax, length
+    return center, radius, segmin, segmax, length
 
 def new_connections(vortex):
     pass
