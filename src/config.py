@@ -11,7 +11,7 @@ class Config:
     direction = "x"
 
     # Simulation parameters
-    num_segments = 100
+    num_segments = 50
     iters = 10
     dt=1e-2
     method = "RK4"

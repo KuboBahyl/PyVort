@@ -39,6 +39,10 @@ class Vortex(object):
                  'velocity_full' : np.zeros(3)}
                  for i in range(self.N)
                 ])
+                
+        # boundary conditions for ring
+        self.segments[0]['backward'] = self.N - 1
+        self.segments[self.N-1]['forward'] = 0
 
     def __repr__(self):
         return 'Quantum Vortex object. Check documentation for available methods.'

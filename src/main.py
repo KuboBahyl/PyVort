@@ -34,11 +34,10 @@ shape = {'center': cf.center,
 
 # Coords init
 coords = create_ring(shape, cf.num_segments)
+
 # Vortex init
 vortex = createVortex(shape, coords)
-# Fixing boundary neighbours
-vortex.segments[0]['backward'] = cf.num_segments - 1
-vortex.segments[cf.num_segments-1]['forward'] = 0
+
 # Filling segment properties - tangent, curvature, velocities
 update_segments(vortex)
 
@@ -118,4 +117,4 @@ if cf.plot_velocities:
     plt.title(cf.plot_velocities_name)
     plt.show()
     if cf.plot_segments_save:
-        plt.savefig('screens/step_'+str(i)+'.png')
+        plt.savefig('screens/velocities.png')
