@@ -87,7 +87,7 @@ def calc_velocity_BIOT(vortex, item):
             first_term = (R_this_len + R_next_len) / (R_this_len * R_next_len)
             second_term = np.cross(R_this, R_next) / (R_this_len * R_next_len + np.dot(R_this, R_next))
 
-            velocity_biot += (kappa / 4*np.pi) * first_term * second_term
+            velocity_biot += kappa * first_term * second_term / (4 * np.pi)
 
     return velocity_biot
 
@@ -197,32 +197,21 @@ def new_segmentation(vortex, dmin, dmax):
 
         if (dist < dmin):
             #make local interpolation with line using 4 points
-            new_point = spline3D(segments, item, next_item, "nearest")
-
-            # add new segment and remove the close ones
-            segments = np.append(segments, {'coords' :  new_point,
-                                            'backward' : item['backward'],
-                                            'forward' : next_item['forward']})
+            item['coords'] = spline3D(segments, item, next_item, type="nearest")
 
             # update indices of new neighbours
-            newitem_index = len(segments) - 1
-            go_backward(segments, item)['forward'] = newitem_index
-            go_forward(segments, next_item)['backward'] = newitem_index
-
-            # safely delete disconnected segments
+            go_forward(segments, next_item)['backward'] = next_item['backward']
             segments = delete_item(segments, item['forward'])
-            segments = delete_item(segments, next_item['backward'])
-
-            i-=1
 
         elif (dist > dmax):
             #make local interpolation with line using 4 points
-            new_point = spline3D(segments, item, next_item, "every_second")
+            new_point = spline3D(segments, item, next_item, type="every_second")
 
             # add new segment along the distant ones
             segments = np.append(segments, {'coords' : new_point,
                                             'backward' : next_item['backward'],
-                                            'forward' : item['forward']})
+                                            'forward' : item['forward'],
+                                            'velocity_BIOT': np.zeros(3)})
 
             # update indices of new neighbours
             newitem_index = len(segments) - 1
@@ -230,8 +219,18 @@ def new_segmentation(vortex, dmin, dmax):
             next_item['backward'] = newitem_index
 
         i += 1
+
+    # boundaries
+    N = len(segments)
+    segments[0]['backward'] = N - 1
+    segments[N-1]['forward'] = 0
     vortex.segments = segments
 
+
+def test_indices(vortex):
+    for j in range(len(vortex.segments)):
+        seg = vortex.segments[j]
+        print("ind {}, back {}, forw {}".format(j, seg['backward'],seg['forward']))
 """
 GOALS:
     - leapfrogging - two circles orbiting each other

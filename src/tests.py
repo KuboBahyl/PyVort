@@ -32,7 +32,10 @@ def print_statistics(vortex):
     velocity_theor = calc_velocity_ring(vortex)
 
     length_theor = 2*np.pi*radius
-    lenErr = calc_error(length, length_theor)
+    length_err = calc_error(length, length_theor)
+
+    if (length_err > 0.01):
+        raise ValueError('Length error too high!')
 
     energy = calc_energy_ring(vortex)
 
@@ -43,7 +46,7 @@ def print_statistics(vortex):
     print('Radius: {}mm'.format(round(10*radius, 2)))
     print('Velocity {}-real: {}um/s'.format(vortex.shape['direction'], round(10**4*velocity, 2)))
     print('Velocity {}-theor: {}um/s'.format(vortex.shape['direction'], round(10**4*velocity_theor, 2)))
-    print('Vortex length error: {}%'.format(round(lenErr, 2)))
+    print('Vortex length error: {}%'.format(round(length_err, 2)))
     print('Vortex energy: {}Mev'.format(round(energy/10**6,3)))
     print('....................')
 

@@ -9,12 +9,9 @@ def spline3D(segments, item, next_item, type):
         first_item = properties.go_backward(segments, item)
         next_next_item = properties.go_forward(segments, next_item)
 
-    if (type=="every_second"):
+    elif (type=="every_second"):
         first_item = properties.go_backward(segments, properties.go_backward(segments, item))
         next_next_item = properties.go_forward(segments, properties.go_forward(segments, next_item))
-
-    else:
-        raise NameError("wrong type in spline3D")
 
     coords_to_spline=[first_item['coords'],
                       item['coords'],
