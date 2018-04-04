@@ -10,6 +10,14 @@ kappa = c.quantum_vorticity # to mm^2/s
 a = c.vortex_width # to mm
 
 ### Some of the tests are very specific for ring object
+def calc_length(vortex):
+    length = 0
+    for item in vortex.segments:
+        nextItem = vortex.segments[item['forward']]
+        segdist = np.linalg.norm(item['coords'] - nextItem['coords'])
+        length += segdist
+    return length
+
 def calc_velocity_ring(vortex):
     radius = vortex.shape['radius']
     return kappa * (np.log(8*radius/a) - 1) / (4*np.pi*radius) # in um/s
@@ -22,21 +30,18 @@ def calc_energy_ring(vortex):
     return E_scalled
 
 def calc_error(real, theor):
-    return 100*(real - theor) / theor
+    return (real - theor) / theor
 
 def print_statistics(vortex):
-    center, radius, segmin, segmax, length = update_vortex(vortex)
+    center, radius, segmin, segmax, length_real = update_vortex(vortex)
 
     velocity = vortex.velocity
     velocity_theor = calc_velocity_ring(vortex)
 
-    length_theor = 2*np.pi*radius
-    length_err = calc_error(length, length_theor)
-
-    if (length_err > 0.01):
-        raise ValueError('Length error too high!')
-
     energy = calc_energy_ring(vortex)
+
+    length_theor = 2*np.pi*vortex.shape['radius']
+    length_err = calc_error(length_real, length_theor)
 
 
     print('Number of segments: {}'.format(vortex.N))
@@ -45,7 +50,7 @@ def print_statistics(vortex):
     print('Radius: {}mm'.format(round(10*radius, 2)))
     print('Velocity {}-real: {}um/s'.format(vortex.shape['direction'], round(10**4*velocity, 2)))
     print('Velocity {}-theor: {}um/s'.format(vortex.shape['direction'], round(10**4*velocity_theor, 2)))
-    print('Vortex length error: {}%'.format(round(length_err, 2)))
+    print('Vortex length error: {}%'.format(round(100*length_err, 2)))
     print('Vortex energy: {}Mev'.format(round(energy/10**6,3)))
     print('....................')
 

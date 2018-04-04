@@ -41,6 +41,27 @@ class Pipeline:
 
         print("Files with velocities created!")
 
+    def stability(num_segs):
+        radii = [0.001, 0.01, 0.1, 1]
+        num_seg_arr = np.linspace(10,100,num_segs)
+
+        cf.log_info = True
+        cf.log_num = 1000
+        cf.method = "euler"
+        cf.iters = 10**5
+
+        for radius in radii:
+            cf.radius = radius
+            epochs_max = np.zeros(num_segs)
+
+            for i in range(num_segs):
+                num = num_seg_arr[i]
+                cf.num_segments = int(num)
+                epochs_max[i] = main(evolute=True, static_quantity_name="epoch")
+
+            np.savetxt('outs/maxiters_radius{}cm.txt'.format(radius), (num_seg_arr, epochs_max), delimiter=',')
+
+        print("Files saved!")
 
     def compare_vels():
         steps = []
@@ -63,4 +84,5 @@ class Pipeline:
         print(quantity)
 
 #Pipeline.sanity_vel_vs_numseg(num_segs=2)
-Pipeline.sanity_quantum(iters=5)
+#Pipeline.sanity_quantum(iters=5)
+Pipeline.stability(num_segs=2)

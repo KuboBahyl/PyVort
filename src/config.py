@@ -32,5 +32,5 @@ class Config:
 
     log_info = True
 
-    graphs = 10 if plot_segments else 0
-    reports = 10 if log_info else 0
+    plot_num = 10 if plot_segments else 0
+    log_num = 10 if log_info else 0

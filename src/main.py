@@ -33,6 +33,17 @@ def plot_vortex(vortex, ax):
     if cf.plot_segments_save:
         plt.savefig('screens/step_'+str(i)+'.png')
 
+def get_static_prop(vortex, static_quantity_name):
+    if static_quantity_name in vortex.__dict__.keys():
+        return getattr(vortex, static_quantity_name)
+    elif static_quantity_name in tests.__dict__.keys():
+         method = getattr(tests, static_quantity_name)
+         quantity = method(vortex)
+         return quantity
+    else:
+        raise ValueError("Given prop '{}' not found".format(static_quantity_name))
+
+
 ###########################
 ###   VORTEX CREATION   ###
 ###########################
@@ -81,13 +92,13 @@ def main(evolute=True,
 
             # REPORT
             if cf.log_info:
-                if ((epoch+1)%round(cf.iters/cf.reports)==0):
-                    print('STARTING STEP {} with dt={}...'.format(i, cf.dt))
+                if ((epoch+1)%round(cf.iters/cf.log_num)==0):
+                    print('STARTING STEP {} with dt={}...'.format(epoch, cf.dt))
                     tests.print_statistics(vortex)
 
             # VISUALISATION
             if cf.plot_segments:
-                if ((epoch+1)%round(cf.iters/cf.graphs)==0):
+                if ((epoch+1)%round(cf.iters/cf.log_num)==0):
                     plot_vortex(vortex, ax)
 
 
@@ -105,6 +116,22 @@ def main(evolute=True,
             # RE-SEGMENT
             new_segmentation(vortex, cf.min_seg_distance, cf.max_seg_distance)
 
+            # KILL IF TOO BIG CIRCUMFERENCE ERROR
+            length_real = tests.calc_length(vortex)
+            length_theor = 2*np.pi*vortex.shape['radius']
+            length_err = tests.calc_error(length_real, length_theor)
+            if (length_err < -0.01):
+                print("Small number of segments!")
+                if (static_quantity_name=="epoch"):
+                    return None
+
+            elif (length_err > 0.01):
+                print("Segments are too noisy!")
+                if (static_quantity_name=="epoch"):
+                    return epoch
+                raise ValueError('Length error too high!')
+
+
             # UPDATE SEGMENT PROPS
             update_segments(vortex)
 
@@ -120,12 +147,8 @@ def main(evolute=True,
             plt.show()
 
     if static_quantity_name is not None:
-        if static_quantity_name in vortex.__dict__.keys():
-            return getattr(vortex, static_quantity_name)
-        elif static_quantity_name in tests.__dict__.keys():
-             method = getattr(tests, static_quantity_name)
-             quantity = method(vortex)
-             return quantity
+        quanity = get_static_prop(vortex, static_quantity_name)
+        return quanity
 
     if dynamic_quantity_name is not None:
         return dynamic_list
