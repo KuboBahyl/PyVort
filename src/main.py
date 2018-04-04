@@ -18,15 +18,15 @@ from config import Config as cf
 from positions import create_ring
 from vortexclass import Vortex as createVortex
 from properties import new_segmentation, new_connections, update_segments
-from tests import calc_velocity_ring, print_statistics
 from run import make_step, change_step
+import tests
 
-def plot_stuff(vortex, ax):
+def plot_vortex(vortex, ax):
     ax.scatter(vortex.getAllAxisCoords(0),
-            vortex.getAllAxisCoords(1),
-            vortex.getAllAxisCoords(2),
-            label='ring',
-            color='blue')
+               vortex.getAllAxisCoords(1),
+               vortex.getAllAxisCoords(2),
+               label='ring',
+               color='blue')
     ax.set_xlabel('x[$\mu$m]')
     ax.set_ylabel('y[$\mu$m]')
     ax.set_zlabel('z[$\mu$m]')
@@ -38,7 +38,7 @@ def plot_stuff(vortex, ax):
 ###########################
 def init():
     # Initial position
-    print('Initialising vortex ring of radius: {}mm and inter-segment distance: {}um...\n'.format(10*cf.radius, round(10**4 * 2*np.pi*cf.radius/cf.num_segments, 2)))
+    print('Initialising vortex ring of radius: {}mm with {} segments...\n'.format(10*cf.radius, cf.num_segments))
 
     shape = {'center': cf.center,
              'radius': cf.radius,
@@ -51,11 +51,17 @@ def init():
     vortex = createVortex(shape, coords)
     return vortex
 
-def main(evolute=True, measure=None):
+def main(evolute=True,
+         static_quantity_name=None,
+         dynamic_quantity_name=None
+         ):
 
     # init and filling the missing segment properties
     vortex = init()
     update_segments(vortex)
+
+    # setting up collectors
+    dynamic_list = np.zeros(cf.iters)
 
     ##########################
     ###   TIME EVOLUTION   ###
@@ -68,25 +74,25 @@ def main(evolute=True, measure=None):
             ax = fig.gca(projection='3d')
             plt.title(cf.plot_segments_name)
 
-        for i in tqdm(range(cf.iters)):
+        for epoch in tqdm(range(cf.iters)):
 
             # TIME-STEP UPDATE
             cf.dt = change_step(vortex, cf.dt, cf.max_shift)
 
             # REPORT
             if cf.log_info:
-                if ((i+1)%round(cf.iters/cf.reports)==0):
+                if ((epoch+1)%round(cf.iters/cf.reports)==0):
                     print('STARTING STEP {} with dt={}...'.format(i, cf.dt))
-                    print_statistics(vortex)
+                    tests.print_statistics(vortex)
 
             # VISUALISATION
             if cf.plot_segments:
-                if ((i+1)%round(cf.iters/cf.graphs)==0):
-                    plot_stuff(vortex, ax)
+                if ((epoch+1)%round(cf.iters/cf.graphs)==0):
+                    plot_vortex(vortex, ax)
 
 
             # KILL SMALL RINGS
-            if (len(vortex.segments) < 10):
+            if (vortex.N < 10):
                 print("Vortex ring too small, deleting...")
                 break
 
@@ -94,31 +100,35 @@ def main(evolute=True, measure=None):
             make_step(cf.method, vortex, cf.dt)
 
             # RE-CONNECT
-            new_connections(vortex) # TODO
+            new_connections(vortex)
 
             # RE-SEGMENT
             new_segmentation(vortex, cf.min_seg_distance, cf.max_seg_distance)
-            vortex.N = len(vortex.segments)
 
-            # UPDATE VORTEX PROPS
+            # UPDATE SEGMENT PROPS
             update_segments(vortex)
+
+            # collecting dynamical quantity
+            if dynamic_quantity_name is not None:
+                if dynamic_quantity_name in vortex.__dict__.keys():
+                    dynamic_list[epoch] = getattr(vortex, dynamic_quantity_name)
+                elif dynamic_quantity_name in tests.__dict__.keys():
+                     method = getattr(tests, dynamic_quantity_name)
+                     dynamic_list[epoch] = method(vortex)
 
         if cf.plot_segments:
             plt.show()
 
-        # Velocity evolution
-        if cf.plot_velocities:
-            plt.figure()
-            plt.scatter(steps, velocities_real, label="Simulation")
-            plt.scatter(steps, velocities_theor, label="Theory")
-            plt.legend(loc=2)
-            plt.title(cf.plot_velocities_name)
-            plt.show()
-            if cf.plot_segments_save:
-                plt.savefig('screens/velocities.png')
+    if static_quantity_name is not None:
+        if static_quantity_name in vortex.__dict__.keys():
+            return getattr(vortex, static_quantity_name)
+        elif static_quantity_name in tests.__dict__.keys():
+             method = getattr(tests, static_quantity_name)
+             quantity = method(vortex)
+             return quantity
 
-    if measure is not None:
-        return getattr(vortex, measure)
+    if dynamic_quantity_name is not None:
+        return dynamic_list
 
 if (__name__ == "__main__"):
     main()

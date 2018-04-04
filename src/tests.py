@@ -10,7 +10,6 @@ kappa = c.quantum_vorticity # to mm^2/s
 a = c.vortex_width # to mm
 
 ### Some of the tests are very specific for ring object
-
 def calc_velocity_ring(vortex):
     radius = vortex.shape['radius']
     return kappa * (np.log(8*radius/a) - 1) / (4*np.pi*radius) # in um/s

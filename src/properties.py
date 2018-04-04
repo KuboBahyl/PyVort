@@ -112,8 +112,10 @@ def calc_velocity_full(vortex, item):
 def update_segments(vortex):
     segments = vortex.segments
     ind = ["x", "y", "z"].index(vortex.shape['direction'])
+    other = np.delete(np.array([0,1,2]), ind)
     N = vortex.N
     vortex.velocity = 0
+    vortex.shape['radius'] = 0
 
     for item in segments:
         # derivatives
@@ -132,7 +134,9 @@ def update_segments(vortex):
         if cf.Quantum:
             item['velocity_drive'] = calc_velocity_drive(vortex, item)
         item['velocity_full'] = calc_velocity_full(vortex, item)
+
         vortex.velocity += item['velocity_full'][ind] / N
+        vortex.shape['radius'] += np.sqrt(item['coords'][other[0]]**2 + item['coords'][other[1]]**2) / N
 
 def update_vortex(vortex):
     center, radius, velocity, length = np.zeros(4)
@@ -224,8 +228,9 @@ def new_segmentation(vortex, dmin, dmax):
     N = len(segments)
     segments[0]['backward'] = N - 1
     segments[N-1]['forward'] = 0
+    # updates
     vortex.segments = segments
-
+    vortex.N = N
 
 def test_indices(vortex):
     for j in range(len(vortex.segments)):
