@@ -7,7 +7,7 @@ Created on Mon Dec 18 21:42:16 2017
 """
 
 quantum_vorticity = 9.97e-4 # cm^2/s
-vortex_width = 1e-8 # cm = 0.1nm
+vortex_width = 1e-8 # cm
 
 temps = [1.0, 1.1, 1.2, 1.3, 1.4, 1.5, 1.6, 1.7, 1.8, 1.9, 2.0, 2.05, 2.10, 2.15]
 # density in g/cm^3

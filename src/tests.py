@@ -6,7 +6,7 @@ import constants as c
 from config import Config as cf
 from properties import update_vortex
 
-kappa = c.quantum_vorticity # to mm^2/s
+kappa = c.quantum_vorticity # to um^2/s
 a = c.vortex_width # to mm
 
 ### Some of the tests are very specific for ring object
@@ -45,6 +45,7 @@ def print_statistics(vortex):
 
 
     print('Number of segments: {}'.format(vortex.N))
+    print('Resolution: {}um'.format(cf.resolution))
     print('Min and max segment distance: {}um, {}um'.format(round(10**4*segmin, 2), round(10**4*segmax, 2)))
     print('Center {}-shift: {}um'.format(vortex.shape['direction'], round(10**4*center,2)))
     print('Radius: {}mm'.format(round(10*radius, 2)))

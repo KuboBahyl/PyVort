@@ -7,59 +7,59 @@ cf.plot_segments = False
 cf.log_info = False
 
 class Pipeline:
-    def sanity_quantum(iters):
-        cf.iters = iters
+    def sanity_quantum(epochs):
+        cf.epochs = epochs
         velocities = []
 
-        iter_list = np.linspace(0,iters,iters)
+        epoch_list = np.linspace(0,epochs-1,epochs)
 
         for cf.Quantum in [True, False]:
             velocities = main(evolute=True, dynamic_quantity_name="velocity")
             energies = main(evolute=True, dynamic_quantity_name="calc_energy_ring")
 
-            np.savetxt('outs/velocites_Quant-{}.txt'.format(cf.Quantum), (iter_list, velocities), delimiter=',')
-            np.savetxt('outs/energies_Quant-{}.txt'.format(cf.Quantum), (iter_list, energies), delimiter=',')
+            np.savetxt('outs/velocites_Quant-{}.txt'.format(cf.Quantum), (epoch_list, velocities), delimiter=',', fmt='%.5e')
+            np.savetxt('outs/energies_Quant-{}.txt'.format(cf.Quantum), (epoch_list, energies), delimiter=',', fmt='%.5e')
 
         print("Files with velocities and energies created!")
 
-    def sanity_vel_vs_numseg(num_segs):
-        cf.iters = 100
-        vels_init = np.zeros(num_segs)
-        vels_100step = np.zeros(num_segs)
+    def sanity_vel_vs_numseg(res_num):
+        vels_init = np.zeros(res_num)
+        vels_100step = np.zeros(res_num)
 
-        num_seg_arr = np.linspace(10,100,num_segs)
+        res_arr = np.linspace(40,200,res_num)
 
-        for i in range(num_segs):
-            num = num_seg_arr[i]
-            cf.num_segments = int(num)
+        for i in range(res_num):
+            res = res_arr[i]
+            cf.resolution = res
 
             vels_init[i] = main(evolute=False, static_quantity_name="velocity")
+            cf.epochs = 100
             vels_100step[i] = main(evolute=True, static_quantity_name="velocity")
 
-        np.savetxt('outs/velocites_0iters.txt', (num_seg_arr, vels_init), delimiter=',')
-        np.savetxt('outs/velocites_100iters.txt', (num_seg_arr, vels_100step), delimiter=',')
+        np.savetxt('outs/velocites_0epochs.txt', (res_arr, vels_init), delimiter=',', fmt='%.5e')
+        np.savetxt('outs/velocites_100epochs.txt', (res_arr, vels_100step), delimiter=',', fmt='%.5e')
 
         print("Files with velocities created!")
 
-    def stability(num_segs):
-        radii = [0.001, 0.01, 0.1, 1]
-        num_seg_arr = np.linspace(10,100,num_segs)
+    def stability(res_num):
+        radii = [500, 1000, 2000]
+        res_arr = np.linspace(40,200,res_num)
 
         cf.log_info = True
-        cf.log_num = 1000
+        cf.log_num = 100
         cf.method = "euler"
-        cf.iters = 10**5
+        cf.epochs = 10**4
 
         for radius in radii:
             cf.radius = radius
-            epochs_max = np.zeros(num_segs)
+            epochs_max = np.zeros(res_num)
 
-            for i in range(num_segs):
-                num = num_seg_arr[i]
-                cf.num_segments = int(num)
+            for i in range(res_num):
+                res = res_arr[i]
+                cf.resolution = res
                 epochs_max[i] = main(evolute=True, static_quantity_name="epoch")
 
-            np.savetxt('outs/maxiters_radius{}cm.txt'.format(radius), (num_seg_arr, epochs_max), delimiter=',')
+            np.savetxt('outs/maxepochs_radius{}um.txt'.format(radius), (res_arr, epochs_max), delimiter=',', fmt='%.5e')
 
         print("Files saved!")
 
@@ -83,6 +83,6 @@ class Pipeline:
                         evolute=False)
         print(quantity)
 
-#Pipeline.sanity_vel_vs_numseg(num_segs=2)
-#Pipeline.sanity_quantum(iters=5)
-Pipeline.stability(num_segs=2)
+#Pipeline.sanity_quantum(epochs=1000)
+#Pipeline.sanity_vel_vs_numseg(res_num=33) # changing res by 5
+Pipeline.stability(res_num=17)

@@ -7,12 +7,12 @@ class Config:
 
     # Vortex ring parameters
     center = [0,0,0]
-    radius = 0.1 #cm = 1000um
+    radius = 1000 #um
     direction = "x"
 
     # Simulation parameters
-    num_segments = 100
-    iters = 10
+    resolution = 40 #um
+    epochs = 100
     dt=0.01
     method = "RK4"
 

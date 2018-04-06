@@ -49,14 +49,14 @@ def get_static_prop(vortex, static_quantity_name):
 ###########################
 def init():
     # Initial position
-    print('Initialising vortex ring of radius: {}mm with {} segments...\n'.format(10*cf.radius, cf.num_segments))
+    print('Initialising vortex ring of radius: {}mm with resulution {}um...\n'.format(cf.radius/10**3, cf.resolution))
 
     shape = {'center': cf.center,
-             'radius': cf.radius,
+             'radius': cf.radius/10**4, # to cm
              'direction': cf.direction}
 
     # Coords init
-    coords = create_ring(shape, cf.num_segments)
+    coords = create_ring(shape, cf.resolution/10**4)
 
     # Vortex init
     vortex = createVortex(shape, coords)
@@ -72,7 +72,7 @@ def main(evolute=True,
     update_segments(vortex)
 
     # setting up collectors
-    dynamic_list = np.zeros(cf.iters)
+    dynamic_list = np.zeros(cf.epochs)
 
     ##########################
     ###   TIME EVOLUTION   ###
@@ -85,25 +85,33 @@ def main(evolute=True,
             ax = fig.gca(projection='3d')
             plt.title(cf.plot_segments_name)
 
-        for epoch in tqdm(range(cf.iters)):
+        for epoch in tqdm(range(cf.epochs)):
+
+            # collecting dynamical quantity
+            if dynamic_quantity_name is not None:
+                if dynamic_quantity_name in vortex.__dict__.keys():
+                    dynamic_list[epoch] = getattr(vortex, dynamic_quantity_name)
+                elif dynamic_quantity_name in tests.__dict__.keys():
+                     method = getattr(tests, dynamic_quantity_name)
+                     dynamic_list[epoch] = method(vortex)
 
             # TIME-STEP UPDATE
             cf.dt = change_step(vortex, cf.dt, cf.max_shift)
 
             # REPORT
             if cf.log_info:
-                if ((epoch+1)%round(cf.iters/cf.log_num)==0):
+                if ((epoch+1)%round(cf.epochs/cf.log_num)==0):
                     print('STARTING STEP {} with dt={}...'.format(epoch, cf.dt))
                     tests.print_statistics(vortex)
 
             # VISUALISATION
             if cf.plot_segments:
-                if ((epoch+1)%round(cf.iters/cf.log_num)==0):
+                if ((epoch+1)%round(cf.epochs/cf.log_num)==0):
                     plot_vortex(vortex, ax)
 
 
             # KILL SMALL RINGS
-            if (vortex.N < 10):
+            if (vortex.N < 4):
                 print("Vortex ring too small, deleting...")
                 break
 
@@ -135,18 +143,12 @@ def main(evolute=True,
             # UPDATE SEGMENT PROPS
             update_segments(vortex)
 
-            # collecting dynamical quantity
-            if dynamic_quantity_name is not None:
-                if dynamic_quantity_name in vortex.__dict__.keys():
-                    dynamic_list[epoch] = getattr(vortex, dynamic_quantity_name)
-                elif dynamic_quantity_name in tests.__dict__.keys():
-                     method = getattr(tests, dynamic_quantity_name)
-                     dynamic_list[epoch] = method(vortex)
-
         if cf.plot_segments:
             plt.show()
 
     if static_quantity_name is not None:
+        if static_quantity_name=="epoch":
+            return cf.epochs
         quanity = get_static_prop(vortex, static_quantity_name)
         return quanity
 
