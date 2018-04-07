@@ -12,7 +12,7 @@ class Config:
     direction = "x"
 
     # Simulation parameters
-    resolution = 30 #um
+    resolution = 70 #um
     epochs = 100
     dt=0.01
     method = "RK4"
