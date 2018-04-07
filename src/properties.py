@@ -57,7 +57,11 @@ def calc_derivative(segments, item, order=1, neighbours=4):
     return derivative
 
 def calc_velocity_LIA(vortex, item):
-    if cf.BIOT:
+    if cf.LIA_updated:
+        r = 1 / np.linalg.norm(item['curvature'])
+        beta = kappa * np.log(2*r/a) / (4*np.pi)
+        
+    else:
         item_prev = go_backward(vortex.segments, item)
         item_next = go_forward(vortex.segments, item)
         len_prev = np.linalg.norm(item_prev['coords'] - item['coords'])
@@ -65,9 +69,6 @@ def calc_velocity_LIA(vortex, item):
 
         log_term = 2 * np.sqrt(len_prev * len_next) / (a * np.e)
         beta = kappa * np.log(log_term) / (4*np.pi)
-    else:
-        r = 1 / np.linalg.norm(item['curvature'])
-        beta = kappa * np.log(2*r/a) / (4*np.pi)
 
     v_lia = beta * np.cross(item['tangent'], item['curvature'])
     return v_lia
@@ -131,7 +132,7 @@ def update_segments(vortex):
         item['velocity_LIA'] = calc_velocity_LIA(vortex, item)
         if cf.BIOT:
             item['velocity_BIOT'] = calc_velocity_BIOT(vortex, item)
-        if cf.Quantum:
+        if not cf.temp_zero:
             item['velocity_drive'] = calc_velocity_drive(vortex, item)
         item['velocity_full'] = calc_velocity_full(vortex, item)
 

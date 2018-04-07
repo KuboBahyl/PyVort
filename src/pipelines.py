@@ -7,13 +7,13 @@ cf.plot_segments = False
 cf.log_info = False
 
 class Pipeline:
-    def sanity_quantum(epochs):
+    def Tzero(epochs):
         cf.epochs = epochs
         velocities = []
 
         epoch_list = np.linspace(0,epochs-1,epochs)
 
-        for cf.Quantum in [True, False]:
+        for cf.temp_zero in [True, False]:
             velocities = main(evolute=True, dynamic_quantity_name="velocity")
             energies = main(evolute=True, dynamic_quantity_name="calc_energy_ring")
 
@@ -22,7 +22,7 @@ class Pipeline:
 
         print("Files with velocities and energies created!")
 
-    def sanity_vel_vs_numseg(res_num):
+    def vel_vs_numseg(res_num):
         vels_init = np.zeros(res_num)
         vels_100step = np.zeros(res_num)
 
@@ -42,8 +42,8 @@ class Pipeline:
         print("Files with velocities created!")
 
     def stability(res_num):
-        radii = [500, 1000, 2000]
-        res_arr = np.linspace(40,200,res_num)
+        radii = [500, 800, 1000]
+        res_arr = np.linspace(20,160,res_num)
 
         cf.log_info = True
         cf.log_num = 100
@@ -83,6 +83,6 @@ class Pipeline:
                         evolute=False)
         print(quantity)
 
-#Pipeline.sanity_quantum(epochs=1000)
-#Pipeline.sanity_vel_vs_numseg(res_num=33) # changing res by 5
-Pipeline.stability(res_num=17)
+#Pipeline.Tzero(epochs=1000)
+Pipeline.vel_vs_numseg(res_num=33) # changing res by 5
+#Pipeline.stability(res_num=15)

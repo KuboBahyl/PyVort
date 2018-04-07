@@ -111,7 +111,7 @@ def main(evolute=True,
 
 
             # KILL SMALL RINGS
-            if (vortex.N < 4):
+            if (vortex.N < 3):
                 print("Vortex ring too small, deleting...")
                 break
 
@@ -131,7 +131,7 @@ def main(evolute=True,
             if (length_err < -0.01):
                 print("Small number of segments!")
                 if (static_quantity_name=="epoch"):
-                    return None
+                    return epoch
 
             elif (length_err > 0.01):
                 print("Segments are too noisy!")

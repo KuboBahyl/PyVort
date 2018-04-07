@@ -1,7 +1,8 @@
 class Config:
     # Environment parameters
-    Quantum = True
-    temperature = 1.5 # K
+    temp_zero = False
+    if not temp_zero:
+        temperature = 1.5 # K
     velocity_normal_ext = [0,0,0]
     velocity_super_ext = [0,0,0]
 
@@ -11,13 +12,14 @@ class Config:
     direction = "x"
 
     # Simulation parameters
-    resolution = 40 #um
+    resolution = 30 #um
     epochs = 100
     dt=0.01
     method = "RK4"
 
     # Hyper-parameters
     BIOT = False
+    LIA_updated = True
     min_seg_distance = 0 #um
     max_seg_distance = 10000 #um
     max_shift = 1 #um
