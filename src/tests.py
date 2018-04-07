@@ -55,7 +55,7 @@ def print_statistics(vortex):
     print('Vortex energy: {}Mev'.format(round(energy/10**6,3)))
     print('....................')
 
-def test_indices(vortex):
+def print_graph(vortex):
     for j in range(len(vortex.segments)):
-        seg = segments[j]
+        seg = vortex.segments[j]
         print("ind {}, back {}, forw {}".format(j, seg['backward'],seg['forward']))

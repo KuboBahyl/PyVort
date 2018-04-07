@@ -3,12 +3,11 @@
 
 """
 Vortex class content:
-    - constructor: assigns initial positions and relative position (neigbours) to each segment
-    - method to focus on backward neighbour
-    - method to focus on forward neighbour
-    - method to add another segment anywhere
-    - method to gain info about certain segment's coords
-    - method to gain all coords along certain direction (0=x,1=y,2=z)
+    - constructor: assigns initial positions, relative position (neigbours) to each segment
+
+    Methods:
+    - get certain segment's coords
+    - get all coords along certain direction {x,y,z}
 
 """
 
@@ -16,13 +15,6 @@ import numpy as np
 
 class Vortex(object):
 
-    """
-    Constructor attributes:
-        N: initial number of segments
-        segments: list of dicts with 3D coordinates
-    """
-
-    # basic neighbour init
     def __init__(self, shape, coords):
         self.shape = shape # TODO refactor
         self.velocity = 0

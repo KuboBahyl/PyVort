@@ -60,7 +60,7 @@ def calc_velocity_LIA(vortex, item):
     if cf.LIA_updated:
         r = 1 / np.linalg.norm(item['curvature'])
         beta = kappa * np.log(2*r/a) / (4*np.pi)
-        
+
     else:
         item_prev = go_backward(vortex.segments, item)
         item_next = go_forward(vortex.segments, item)
@@ -165,30 +165,10 @@ def update_vortex(vortex):
 
 def new_connections(vortex):
     pass
-    """
-    N = len(segments)
-    new_segments = segments
-    segments = np.delete(segments, segments[0])
-
-    for i in range(N-1):
-        focus_item = new_segments[i]
-        mindist = math.inf
-
-        for item in segments:
-            dist = np.linalg.norm(focus_item['coords'] - item['coords'])
-            if (dist < mindist):
-                mindist = dist
-                new_segments[i]['forward'] = np.asscalar(np.argwhere(segments==item))
-                new_segments[i+1] = item
-
-        segments = np.delete(segments, new_segments[i]['forward'])
-
-
-    return new_segments
-    """
 
 def new_segmentation(vortex, dmin, dmax):
-# assumes that indices are already assigned
+
+# assumes that segments are already reconnected = indices are assigned
     segments = vortex.segments
 
     dmin /= 10**4
@@ -232,13 +212,3 @@ def new_segmentation(vortex, dmin, dmax):
     # updates
     vortex.segments = segments
     vortex.N = N
-
-def test_indices(vortex):
-    for j in range(len(vortex.segments)):
-        seg = vortex.segments[j]
-        print("ind {}, back {}, forw {}".format(j, seg['backward'],seg['forward']))
-"""
-GOALS:
-    - leapfrogging - two circles orbiting each other
-    - intersection of two circles: as Emil's simulation
-"""

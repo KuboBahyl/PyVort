@@ -1,9 +1,8 @@
 #!/usr/bin/env python3
 """
 Here is performed the main loop of simulation.
-To clear all data, execute `%reset` in ipython console
 """
-###################################################
+###################
 ###   IMPORTS   ###
 ###################
 
@@ -31,7 +30,7 @@ def plot_vortex(vortex, ax):
     ax.set_ylabel('y[$\mu$m]')
     ax.set_zlabel('z[$\mu$m]')
     if cf.plot_segments_save:
-        plt.savefig('screens/step_'+str(i)+'.png')
+        plt.savefig('graphics/'+cf.plot_segments_filename+'.pdf')
 
 def get_static_prop(vortex, static_quantity_name):
     if static_quantity_name in vortex.__dict__.keys():
@@ -83,7 +82,7 @@ def main(evolute=True,
         if cf.plot_segments:
             fig = plt.figure()
             ax = fig.gca(projection='3d')
-            plt.title(cf.plot_segments_name)
+            plt.title(cf.plot_segments_title)
 
         for epoch in tqdm(range(cf.epochs)):
 
@@ -106,7 +105,7 @@ def main(evolute=True,
 
             # VISUALISATION
             if cf.plot_segments:
-                if ((epoch+1)%round(cf.epochs/cf.log_num)==0):
+                if ((epoch+1)%round(cf.epochs/cf.plot_num)==0):
                     plot_vortex(vortex, ax)
 
 
