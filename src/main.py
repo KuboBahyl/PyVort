@@ -110,7 +110,7 @@ def main(evolute=True,
 
 
             # KILL SMALL RINGS
-            if (vortex.N < 3):
+            if (vortex.active_segments < 3):
                 print("Vortex ring too small, deleting...")
                 break
 

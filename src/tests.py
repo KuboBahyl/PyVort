@@ -13,9 +13,10 @@ a = c.vortex_width # to mm
 def calc_length(vortex):
     length = 0
     for item in vortex.segments:
-        nextItem = vortex.segments[item['forward']]
-        segdist = np.linalg.norm(item['coords'] - nextItem['coords'])
-        length += segdist
+        if item['active']:
+            nextItem = vortex.segments[item['forward']]
+            segdist = np.linalg.norm(item['coords'] - nextItem['coords'])
+            length += segdist
     return length
 
 def calc_velocity_ring(vortex):
@@ -44,7 +45,7 @@ def print_statistics(vortex):
     length_err = calc_error(length_real, length_theor)
 
 
-    print('Number of segments: {}'.format(vortex.N))
+    print('Number of segments: {}'.format(vortex.active_segments))
     print('Resolution: {}um'.format(cf.resolution))
     print('Min and max segment distance: {}um, {}um'.format(round(10**4*segmin, 2), round(10**4*segmax, 2)))
     print('Center {}-shift: {}um'.format(vortex.shape['direction'], round(10**4*center,2)))

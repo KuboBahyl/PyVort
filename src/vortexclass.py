@@ -18,9 +18,10 @@ class Vortex(object):
     def __init__(self, shape, coords):
         self.shape = shape # TODO refactor
         self.velocity = 0
-        self.N = len(coords)
+        self.active_segments = len(coords)
         self.segments = np.array([
-                {'coords' : coords[i],
+                {'active' : True,
+                 'coords' : coords[i],
                  'backward' : i-1,
                  'forward' : i+1,
                  'tangent' : None,
@@ -29,12 +30,12 @@ class Vortex(object):
                  'velocity_BIOT': np.zeros(3),
                  'velocity_drive' : np.zeros(3),
                  'velocity_full' : np.zeros(3)}
-                 for i in range(self.N)
+                 for i in range(self.active_segments)
                 ])
 
         # boundary conditions for ring
-        self.segments[0]['backward'] = self.N - 1
-        self.segments[self.N-1]['forward'] = 0
+        self.segments[0]['backward'] = self.active_segments - 1
+        self.segments[self.active_segments-1]['forward'] = 0
 
     def __repr__(self):
         return 'Quantum Vortex object. Check documentation for available methods.'
@@ -45,12 +46,13 @@ class Vortex(object):
 ######################################
 
     def getAllCoords(self, index):
-        return [self.segments[i]['coords']
-                for i in range(len(self.segments))]
+        return [item['coords']
+                for item in self.segments]
 
     def getAllAxisCoords(self, axis):
-        return [10**4*self.segments[i]['coords'][axis]
-                for i  in range(len(self.segments))]
+        return [10**4*item['coords'][axis]
+                for item in self.segments
+                if item['active'] == True]
 
 """
 Maybe it will be useful later

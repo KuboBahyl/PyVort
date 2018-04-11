@@ -14,7 +14,7 @@ class Config:
 
     # Simulation parameters
     resolution = 60 #um
-    epochs = 100
+    epochs = 10
     dt=0.01
     method = "RK4"
 

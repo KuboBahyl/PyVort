@@ -23,15 +23,6 @@ def go_backward(segments, item):
 def go_forward(segments, item):
     return segments[item['forward']]
 
-def delete_item(segments, itemindex_to_delete):
-    segments = np.delete(segments, itemindex_to_delete)
-    for item in segments:
-        if (item['forward'] > itemindex_to_delete):
-            item['forward'] -= 1
-        if (item['backward'] > itemindex_to_delete):
-            item['backward'] -= 1
-    return segments
-
 def calc_derivative(segments, item, order=1, neighbours=4):
     # start with the first item in range
     firstItem = go_backward(segments, go_backward(segments, item))
@@ -114,34 +105,35 @@ def update_segments(vortex):
     segments = vortex.segments
     ind = ["x", "y", "z"].index(vortex.shape['direction'])
     other = np.delete(np.array([0,1,2]), ind)
-    N = vortex.N
+    N = vortex.active_segments
     vortex.velocity = 0
     vortex.shape['radius'] = 0
 
     for item in segments:
-        # derivatives
-        item['tangent'] = calc_derivative(segments, item, order=1)
-        item['curvature'] = calc_derivative(segments, item, order=2)
+        if item['active']:
+            # derivatives
+            item['tangent'] = calc_derivative(segments, item, order=1)
+            item['curvature'] = calc_derivative(segments, item, order=2)
 
-        # normalisation
-        norm = np.linalg.norm(item['tangent'])
-        item['tangent'] /= norm
-        item['curvature'] /= norm**2 # maybe not so useful
+            # normalisation
+            norm = np.linalg.norm(item['tangent'])
+            item['tangent'] /= norm
+            item['curvature'] /= norm**2 # maybe not so useful
 
-        # velocities
-        item['velocity_LIA'] = calc_velocity_LIA(vortex, item)
-        if cf.BIOT:
-            item['velocity_BIOT'] = calc_velocity_BIOT(vortex, item)
-        if not cf.temp_zero:
-            item['velocity_drive'] = calc_velocity_drive(vortex, item)
-        item['velocity_full'] = calc_velocity_full(vortex, item)
+            # velocities
+            item['velocity_LIA'] = calc_velocity_LIA(vortex, item)
+            if cf.BIOT:
+                item['velocity_BIOT'] = calc_velocity_BIOT(vortex, item)
+            if not cf.temp_zero:
+                item['velocity_drive'] = calc_velocity_drive(vortex, item)
+            item['velocity_full'] = calc_velocity_full(vortex, item)
 
-        vortex.velocity += item['velocity_full'][ind] / N
-        vortex.shape['radius'] += np.sqrt(item['coords'][other[0]]**2 + item['coords'][other[1]]**2) / N
+            vortex.velocity += item['velocity_full'][ind] / N
+            vortex.shape['radius'] += np.sqrt(item['coords'][other[0]]**2 + item['coords'][other[1]]**2) / N
 
 def update_vortex(vortex):
     center, radius, velocity, length = np.zeros(4)
-    N = vortex.N
+    N = vortex.active_segments
     ind = ["x", "y", "z"].index(vortex.shape['direction'])
     other = np.delete(np.array([0,1,2]), ind)
 
@@ -149,14 +141,15 @@ def update_vortex(vortex):
     segmax = 0
 
     for item in vortex.segments:
-        center += item['coords'][ind] / N
-        radius += np.sqrt(item['coords'][other[0]]**2 + item['coords'][other[1]]**2) / N
+        if item['active']:
+            center += item['coords'][ind] / N
+            radius += np.sqrt(item['coords'][other[0]]**2 + item['coords'][other[1]]**2) / N
 
-        nextItem = vortex.segments[item['forward']]
-        segdist = np.linalg.norm(item['coords'] - nextItem['coords'])
-        segmin = segdist if (segdist < segmin) else segmin
-        segmax = segdist if (segdist > segmax) else segmax
-        length += segdist
+            nextItem = vortex.segments[item['forward']]
+            segdist = np.linalg.norm(item['coords'] - nextItem['coords'])
+            segmin = segdist if (segdist < segmin) else segmin
+            segmax = segdist if (segdist > segmax) else segmax
+            length += segdist
 
     vortex.shape['center'][ind] = center
     vortex.shape['radius'] = radius
@@ -170,6 +163,7 @@ def new_segmentation(vortex, dmin, dmax):
 
 # assumes that segments are already reconnected = indices are assigned
     segments = vortex.segments
+    N = vortex.active_segments
 
     dmin /= 10**4
     dmax /= 10**4
@@ -177,38 +171,54 @@ def new_segmentation(vortex, dmin, dmax):
 
     while (i < len(segments)):
         item = segments[i]
-        next_item = go_forward(segments, item)
-        dist = np.linalg.norm(item['coords'] - next_item['coords'])
 
-        if (dist < dmin):
-            #make local interpolation with line using 4 points
-            item['coords'] = spline3D(segments, item, next_item, type="nearest")
+        if item['active']:
+            next_item = go_forward(segments, item)
+            dist = np.linalg.norm(item['coords'] - next_item['coords'])
 
-            # update indices of new neighbours
-            go_forward(segments, next_item)['backward'] = next_item['backward']
-            segments = delete_item(segments, item['forward'])
+            if (dist < dmin):
+                # make local interpolation with line using 4 points
+                item['coords'] = spline3D(segments, item, next_item, type="nearest")
 
-        elif (dist > dmax):
-            #make local interpolation with line using 4 points
-            new_point = spline3D(segments, item, next_item, type="every_second")
+                # update new neighbours
+                item['forward'] = next_item['forward']
+                next_next_item = go_forward(segments, next_item)
+                next_next_item['backward'] = next_item['backward']
 
-            # add new segment along the distant ones
-            segments = np.append(segments, {'coords' : new_point,
-                                            'backward' : next_item['backward'],
-                                            'forward' : item['forward'],
-                                            'velocity_BIOT': np.zeros(3)})
+                # making next_item inactive
+                next_item['active'] = False
 
-            # update indices of new neighbours
-            newitem_index = len(segments) - 1
-            item['forward'] = newitem_index
-            next_item['backward'] = newitem_index
+                N -= 1
+
+            elif (dist > dmax):
+                # make local interpolation with line using 4 points
+                new_point = spline3D(segments, item, next_item, type="every_second")
+
+                # add new segment along the distant ones
+                segments = np.append(segments, {'active': True,
+                                                'coords' : new_point,
+                                                'backward' : next_item['backward'],
+                                                'forward' : item['forward'],
+                                                'velocity_LIA': np.zeros(3),
+                                                'velocity_BIOT': np.zeros(3),
+                                                'velocity_drive' : np.zeros(3),
+                                                'velocity_full' : np.zeros(3)
+                                                })
+
+                # update indices of new neighbours
+                newitem_index = len(segments) - 1
+                item['forward'] = newitem_index
+                next_item['backward'] = newitem_index
+
+                N += 1
 
         i += 1
 
-    # boundaries
-    N = len(segments)
-    segments[0]['backward'] = N - 1
-    segments[N-1]['forward'] = 0
-    # updates
+    # making sure of boundaries
+    #N = len(segments)
+    #segments[0]['backward'] = N - 1
+    #segments[N-1]['forward'] = 0
+
+    # vortex updates
     vortex.segments = segments
-    vortex.N = N
+    vortex.active_segments = N

@@ -37,31 +37,44 @@ def rk4_step(vortex, dt):
     virtualVortex = cp.deepcopy(vortex)
 
     # real and virtual segments
-    real_seg = vortex.segments
-    virtual_seg = virtualVortex.segments
-    N = vortex.N
+    segments_real = vortex.segments
+    segments_virtual = virtualVortex.segments
+
+    N = len(segments_real)
 
     # RK4 coefficients
     k1, k2, k3, k4 = [np.zeros([N,3]) for i in range(4)]
 
     for i in range(N):
-        k1[i] = real_seg[i]['velocity_full']
-        virtual_seg[i]['coords'] = real_seg[i]['coords'] + k1[i] * dt * 0.5
+        item_real = segments_real[i]
+        if item_real['active']:
+            item_virtual = segments_virtual[i]
+            k1[i] = item_real['velocity_full']
+            item_virtual['coords'] = item_real['coords'] + k1[i] * dt * 0.5
 
     update_segments(virtualVortex)
 
     for i in range(N):
-        k2[i] = virtual_seg[i]['velocity_full']
-        virtual_seg[i]['coords'] = real_seg[i]['coords'] + k2[i] * dt * 0.5
+        item_real = segments_real[i]
+        if item_real['active']:
+            item_virtual = segments_virtual[i]
+            k2[i] = item_real['velocity_full']
+            item_virtual['coords'] = item_real['coords'] + k2[i] * dt * 0.5
 
     update_segments(virtualVortex)
 
     for i in range(N):
-        k3[i] = virtual_seg[i]['velocity_full']
-        virtual_seg[i]['coords'] = real_seg[i]['coords'] + k3[i] * dt
+        item_real = segments_real[i]
+        if item_real['active']:
+            item_virtual = segments_virtual[i]
+            k3[i] = item_real['velocity_full']
+            item_virtual['coords'] = item_real['coords'] + k3[i] * dt
 
     update_segments(virtualVortex)
 
     for i in range(N):
-        k4[i] = virtual_seg[i]['velocity_full']
-        real_seg[i]['coords'] += (1/6) * (k1[i] + 2*k2[i] + 2*k3[i] + k4[i]) * dt
+        item_real = segments_real[i]
+        if item_real['active']:
+            item_virtual = segments_virtual[i]
+            k4[i] = item_virtual['velocity_full']
+            item_real['coords'] += (1/6) * (k1[i] + 2*k2[i] + 2*k3[i] + k4[i]) * dt
