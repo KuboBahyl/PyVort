@@ -61,6 +61,7 @@ def calc_velocity_LIA(vortex, item):
         # log_term = 2 * np.sqrt(len_prev * len_next) / (a * np.sqrt(np.e))
         # beta = kappa * np.log(log_term) / (4*np.pi)
         r = 1 / np.linalg.norm(item['curvature'])
+        r = vortex.shape['radius']
         beta = kappa * np.log(r/a) / (4*np.pi)
 
     v_lia = beta * np.cross(item['tangent'], item['curvature'])
@@ -111,9 +112,7 @@ def update_segments(vortex):
     other = np.delete(np.array([0,1,2]), ind)
     N = vortex.active_segments
 
-    vortex.velocity = 0
-    vortex.shape['center'] = 0
-    vortex.shape['radius'] = 0
+    velocity, center, radius = np.zeros(3)
 
     for item in segments:
         if item['active']:
@@ -134,9 +133,13 @@ def update_segments(vortex):
                 item['velocity_drive'] = calc_velocity_drive(vortex, item)
             item['velocity_full'] = calc_velocity_full(vortex, item)
 
-            vortex.velocity += item['velocity_full'][ind] / N
-            vortex.shape['center'] += item['coords'][ind] / N
-            vortex.shape['radius'] += np.sqrt(item['coords'][other[0]]**2 + item['coords'][other[1]]**2) / N
+            velocity += item['velocity_full'][ind] / N
+            center += item['coords'][ind] / N
+            radius += np.sqrt(item['coords'][other[0]]**2 + item['coords'][other[1]]**2) / N
+
+    vortex.velocity = velocity
+    vortex.shape['center'] = center
+    vortex.shape['radius'] = radius
 
 def new_connections(vortex):
     pass
