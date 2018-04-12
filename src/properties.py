@@ -53,13 +53,15 @@ def calc_velocity_LIA(vortex, item):
         beta = kappa * np.log(2*r/a) / (4*np.pi)
 
     else:
-        item_prev = go_backward(vortex.segments, item)
-        item_next = go_forward(vortex.segments, item)
-        len_prev = np.linalg.norm(item_prev['coords'] - item['coords'])
-        len_next = np.linalg.norm(item_next['coords'] - item['coords'])
-
-        log_term = 2 * np.sqrt(len_prev * len_next) / (a * np.sqrt(np.e))
-        beta = kappa * np.log(log_term) / (4*np.pi)
+        # item_prev = go_backward(vortex.segments, item)
+        # item_next = go_forward(vortex.segments, item)
+        # len_prev = np.linalg.norm(item_prev['coords'] - item['coords'])
+        # len_next = np.linalg.norm(item_next['coords'] - item['coords'])
+        #
+        # log_term = 2 * np.sqrt(len_prev * len_next) / (a * np.sqrt(np.e))
+        # beta = kappa * np.log(log_term) / (4*np.pi)
+        r = 1 / np.linalg.norm(item['curvature'])
+        beta = kappa * np.log(r/a) / (4*np.pi)
 
     v_lia = beta * np.cross(item['tangent'], item['curvature'])
     return v_lia
@@ -69,17 +71,19 @@ def calc_velocity_BIOT(vortex, item):
     velocity_biot = np.zeros(3)
 
     for other_item in segments:
-        next_item = go_forward(segments, other_item)
-        if (other_item['forward'] != item['forward'] and next_item['forward'] != item['forward']):
-            R_this = other_item['coords'] - item['coords']
-            R_next = next_item['coords'] - item['coords']
-            R_this_len = np.linalg.norm(R_this)
-            R_next_len = np.linalg.norm(R_next)
+        if other_item['active']:
+            next_item = go_forward(segments, other_item)
+            if next_item['active']:
+                if (other_item['forward'] != item['forward'] and next_item['forward'] != item['forward']):
+                    R_this = other_item['coords'] - item['coords']
+                    R_next = next_item['coords'] - item['coords']
+                    R_this_len = np.linalg.norm(R_this)
+                    R_next_len = np.linalg.norm(R_next)
 
-            first_term = (R_this_len + R_next_len) / (R_this_len * R_next_len)
-            second_term = np.cross(R_this, R_next) / (R_this_len * R_next_len + np.dot(R_this, R_next))
+                    first_term = (R_this_len + R_next_len) / (R_this_len * R_next_len)
+                    second_term = np.cross(R_this, R_next) / (R_this_len * R_next_len + np.dot(R_this, R_next))
 
-            velocity_biot += kappa * first_term * second_term / (4 * np.pi)
+                    velocity_biot += kappa * first_term * second_term / (4 * np.pi)
 
     return velocity_biot
 
@@ -106,7 +110,9 @@ def update_segments(vortex):
     ind = ["x", "y", "z"].index(vortex.shape['direction'])
     other = np.delete(np.array([0,1,2]), ind)
     N = vortex.active_segments
+
     vortex.velocity = 0
+    vortex.shape['center'] = 0
     vortex.shape['radius'] = 0
 
     for item in segments:
@@ -129,32 +135,8 @@ def update_segments(vortex):
             item['velocity_full'] = calc_velocity_full(vortex, item)
 
             vortex.velocity += item['velocity_full'][ind] / N
+            vortex.shape['center'] += item['coords'][ind] / N
             vortex.shape['radius'] += np.sqrt(item['coords'][other[0]]**2 + item['coords'][other[1]]**2) / N
-
-def update_vortex(vortex):
-    center, radius, velocity, length = np.zeros(4)
-    N = vortex.active_segments
-    ind = ["x", "y", "z"].index(vortex.shape['direction'])
-    other = np.delete(np.array([0,1,2]), ind)
-
-    segmin = np.inf
-    segmax = 0
-
-    for item in vortex.segments:
-        if item['active']:
-            center += item['coords'][ind] / N
-            radius += np.sqrt(item['coords'][other[0]]**2 + item['coords'][other[1]]**2) / N
-
-            nextItem = vortex.segments[item['forward']]
-            segdist = np.linalg.norm(item['coords'] - nextItem['coords'])
-            segmin = segdist if (segdist < segmin) else segmin
-            segmax = segdist if (segdist > segmax) else segmax
-            length += segdist
-
-    vortex.shape['center'][ind] = center
-    vortex.shape['radius'] = radius
-
-    return center, radius, segmin, segmax, length
 
 def new_connections(vortex):
     pass

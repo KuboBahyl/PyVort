@@ -4,19 +4,28 @@
 import numpy as np
 import constants as c
 from config import Config as cf
-from properties import update_vortex
 
 kappa = c.quantum_vorticity # to um^2/s
 a = c.vortex_width # to mm
 
 ### Some of the tests are very specific for ring object
-def calc_length(vortex):
+def calc_length_res(vortex, segdists=False):
     length = 0
+    segmin = np.inf
+    segmax = 0
+
     for item in vortex.segments:
         if item['active']:
             nextItem = vortex.segments[item['forward']]
             segdist = np.linalg.norm(item['coords'] - nextItem['coords'])
+            segdist = np.linalg.norm(item['coords'] - nextItem['coords'])
+            segmin = segdist if (segdist < segmin) else segmin
+            segmax = segdist if (segdist > segmax) else segmax
             length += segdist
+
+    if segdists:
+        return length, segmin, segmax
+
     return length
 
 def calc_velocity_ring(vortex):
@@ -34,21 +43,21 @@ def calc_error(real, theor):
     return (real - theor) / theor
 
 def print_statistics(vortex):
-    center, radius, segmin, segmax, length_real = update_vortex(vortex)
+    radius = vortex.shape['radius']
+    length_real, segmin, segmax = calc_length_res(vortex, segdists=True)
+
+    length_theor = 2*np.pi*radius
+    length_err = calc_error(length_real, length_theor)
 
     velocity = vortex.velocity
     velocity_theor = calc_velocity_ring(vortex)
 
     energy = calc_energy_ring(vortex)
 
-    length_theor = 2*np.pi*vortex.shape['radius']
-    length_err = calc_error(length_real, length_theor)
-
-
     print('Number of segments: {}'.format(vortex.active_segments))
     print('Resolution: {}um'.format(cf.resolution))
     print('Min and max segment distance: {}um, {}um'.format(round(10**4*segmin, 2), round(10**4*segmax, 2)))
-    print('Center {}-shift: {}um'.format(vortex.shape['direction'], round(10**4*center,2)))
+    print('Center {}-shift: {}um'.format(vortex.shape['direction'], round(10**4*vortex.shape['center'],2)))
     print('Radius: {}mm'.format(round(10*radius, 2)))
     print('Velocity {}-real: {}um/s'.format(vortex.shape['direction'], round(10**4*velocity, 2)))
     print('Velocity {}-theor: {}um/s'.format(vortex.shape['direction'], round(10**4*velocity_theor, 2)))

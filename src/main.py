@@ -124,7 +124,7 @@ def main(evolute=True,
             new_segmentation(vortex, cf.min_seg_distance, cf.max_seg_distance)
 
             # KILL IF TOO BIG CIRCUMFERENCE ERROR
-            length_real = tests.calc_length(vortex)
+            length_real = tests.calc_length_res(vortex)
             length_theor = 2*np.pi*vortex.shape['radius']
             length_err = tests.calc_error(length_real, length_theor)
             if (length_err < -0.01):
