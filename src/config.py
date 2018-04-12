@@ -20,7 +20,7 @@ class Config:
 
     # Hyper-parameters
     BIOT = False
-    LIA_updated = False
+    LIA_updated = True
     min_seg_distance = 0.5 * resolution #um
     max_seg_distance = 2 * resolution #um
     max_shift = 1 #um

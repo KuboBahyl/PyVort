@@ -24,13 +24,13 @@ def calc_length_res(vortex, segdists=False):
             length += segdist
 
     if segdists:
-        return length, segmin, segmax
+        return length, segmin, segmax #cm
 
     return length
 
 def calc_velocity_ring(vortex):
     radius = vortex.shape['radius']
-    return kappa * (np.log(8*radius/a) - 1) / (4*np.pi*radius) # in um/s
+    return kappa * (np.log(8*radius/a) - 1) / (4*np.pi*radius) # cm/s
 
 def calc_energy_ring(vortex):
     rho_tot, rho_s = c.get_densities(cf.temperature)

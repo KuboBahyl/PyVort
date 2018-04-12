@@ -61,7 +61,6 @@ def calc_velocity_LIA(vortex, item):
         # log_term = 2 * np.sqrt(len_prev * len_next) / (a * np.sqrt(np.e))
         # beta = kappa * np.log(log_term) / (4*np.pi)
         r = 1 / np.linalg.norm(item['curvature'])
-        r = vortex.shape['radius']
         beta = kappa * np.log(r/a) / (4*np.pi)
 
     v_lia = beta * np.cross(item['tangent'], item['curvature'])
@@ -71,20 +70,22 @@ def calc_velocity_BIOT(vortex, item):
     segments = vortex.segments
     velocity_biot = np.zeros(3)
 
-    for other_item in segments:
-        if other_item['active']:
-            next_item = go_forward(segments, other_item)
-            if next_item['active']:
-                if (other_item['forward'] != item['forward'] and next_item['forward'] != item['forward']):
-                    R_this = other_item['coords'] - item['coords']
-                    R_next = next_item['coords'] - item['coords']
-                    R_this_len = np.linalg.norm(R_this)
-                    R_next_len = np.linalg.norm(R_next)
+    for first_item in segments:
+        if first_item['active']:
+            second_item = go_forward(segments, first_item)
+            if second_item['active']:
+                if (first_item['forward'] != item['forward'] and second_item['forward'] != item['forward']):
+                    R_first = first_item['coords'] - item['coords']
+                    R_second = second_item['coords'] - item['coords']
+                    R_first_len = np.linalg.norm(R_first)
+                    R_second_len = np.linalg.norm(R_second)
 
-                    first_term = (R_this_len + R_next_len) / (R_this_len * R_next_len)
-                    second_term = np.cross(R_this, R_next) / (R_this_len * R_next_len + np.dot(R_this, R_next))
+                    # first_term = (R_first_len + R_second_len) / (R_first_len * R_second_len)
+                    # second_term = np.cross(R_first, R_second) / (R_first_len * R_second_len + np.dot(R_first, R_second))
 
-                    velocity_biot += kappa * first_term * second_term / (4 * np.pi)
+                    term = (R_first_len + R_second_len) * np.cross(R_first, R_second) / (R_first_len * R_second_len * (R_first_len * R_second_len + np.dot(R_first, R_second)))
+
+                    velocity_biot += kappa * term / (4 * np.pi)
 
     return velocity_biot
 
