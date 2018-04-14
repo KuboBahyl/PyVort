@@ -58,7 +58,7 @@ def rk4_step(vortex, dt):
         item_real = segments_real[i]
         if item_real['active']:
             item_virtual = segments_virtual[i]
-            k2[i] = item_real['velocity_full']
+            k2[i] = item_virtual['velocity_full']
             item_virtual['coords'] = item_real['coords'] + k2[i] * dt * 0.5
 
     update_segments(virtualVortex)
@@ -67,7 +67,7 @@ def rk4_step(vortex, dt):
         item_real = segments_real[i]
         if item_real['active']:
             item_virtual = segments_virtual[i]
-            k3[i] = item_real['velocity_full']
+            k3[i] = item_virtual['velocity_full']
             item_virtual['coords'] = item_real['coords'] + k3[i] * dt
 
     update_segments(virtualVortex)

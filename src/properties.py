@@ -53,15 +53,13 @@ def calc_velocity_LIA(vortex, item):
         beta = kappa * np.log(2*r/a) / (4*np.pi)
 
     else:
-        # item_prev = go_backward(vortex.segments, item)
-        # item_next = go_forward(vortex.segments, item)
-        # len_prev = np.linalg.norm(item_prev['coords'] - item['coords'])
-        # len_next = np.linalg.norm(item_next['coords'] - item['coords'])
-        #
-        # log_term = 2 * np.sqrt(len_prev * len_next) / (a * np.sqrt(np.e))
-        # beta = kappa * np.log(log_term) / (4*np.pi)
-        r = 1 / np.linalg.norm(item['curvature'])
-        beta = kappa * np.log(r/a) / (4*np.pi)
+        item_prev = go_backward(vortex.segments, item)
+        item_next = go_forward(vortex.segments, item)
+        len_prev = np.linalg.norm(item_prev['coords'] - item['coords'])
+        len_next = np.linalg.norm(item_next['coords'] - item['coords'])
+
+        log_term = 2 * np.sqrt(len_prev * len_next) / (a * np.sqrt(np.e))
+        beta = kappa * np.log(log_term) / (4*np.pi)
 
     v_lia = beta * np.cross(item['tangent'], item['curvature'])
     return v_lia
@@ -80,12 +78,10 @@ def calc_velocity_BIOT(vortex, item):
                     R_first_len = np.linalg.norm(R_first)
                     R_second_len = np.linalg.norm(R_second)
 
-                    # first_term = (R_first_len + R_second_len) / (R_first_len * R_second_len)
-                    # second_term = np.cross(R_first, R_second) / (R_first_len * R_second_len + np.dot(R_first, R_second))
+                    first_term = (R_first_len + R_second_len) / (R_first_len * R_second_len)
+                    second_term = np.cross(R_first, R_second) / (R_first_len * R_second_len + np.dot(R_first, R_second))
 
-                    term = (R_first_len + R_second_len) * np.cross(R_first, R_second) / (R_first_len * R_second_len * (R_first_len * R_second_len + np.dot(R_first, R_second)))
-
-                    velocity_biot += kappa * term / (4 * np.pi)
+                    velocity_biot += kappa * first_term * second_term / (4 * np.pi)
 
     return velocity_biot
 

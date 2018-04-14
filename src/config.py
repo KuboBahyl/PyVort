@@ -14,7 +14,7 @@ class Config:
 
     # Simulation parameters
     resolution = 60 #um
-    epochs = 10
+    epochs = 100
     dt=0.01
     method = "RK4"
 
@@ -34,5 +34,5 @@ class Config:
 
     log_info = True
 
-    plot_num = 10 if plot_segments else 0
-    log_num = epochs/10 if log_info else 0
+    plot_num = 10
+    log_num = epochs/10
