@@ -110,7 +110,7 @@ def main(evolute=True,
 
 
             # KILL SMALL RINGS
-            if (vortex.active_segments < 3):
+            if (vortex.active_segments < cf.min_num_seg):
                 print("Vortex ring too small, deleting...")
                 break
 
@@ -127,12 +127,12 @@ def main(evolute=True,
             length_real = tests.calc_length_res(vortex)
             length_theor = 2*np.pi*vortex.shape['radius']
             length_err = tests.calc_error(length_real, length_theor)
-            if (length_err < -0.01):
+            if (length_err < -cf.length_max_error):
                 print("Small number of segments!")
                 if (static_quantity_name=="epoch"):
                     return epoch
 
-            elif (length_err > 0.01):
+            elif (length_err > cf.length_max_error):
                 print("Segments are too noisy!")
                 if (static_quantity_name=="epoch"):
                     return epoch

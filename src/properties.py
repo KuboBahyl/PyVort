@@ -58,7 +58,7 @@ def calc_velocity_LIA(vortex, item):
         len_prev = np.linalg.norm(item_prev['coords'] - item['coords'])
         len_next = np.linalg.norm(item_next['coords'] - item['coords'])
 
-        log_term = 2 * np.sqrt(len_prev * len_next) / (a * np.sqrt(np.e))
+        log_term = np.sqrt(len_prev * len_next) / a
         beta = kappa * np.log(log_term) / (4*np.pi)
 
     v_lia = beta * np.cross(item['tangent'], item['curvature'])
