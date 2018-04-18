@@ -7,7 +7,6 @@ Created on Wed Dec 20 18:32:55 2017
 """
 import numpy as np
 import copy as cp
-from properties import update_segments
 
 def change_step(Ring, dt, max_shift):
     next_step = Ring.velocity * dt
@@ -51,7 +50,7 @@ def rk4_step(Env, Ring, Vortex, dt):
             k1[i] = item_real['velocity_full']
             item_virtual['coords'] = item_real['coords'] + k1[i] * dt * 0.5
 
-    update_segments(Env, Ring, virtualVortex)
+    virtualVortex.update_segments(Env, Ring)
 
     for i in range(N):
         item_real = segments_real[i]
@@ -60,7 +59,7 @@ def rk4_step(Env, Ring, Vortex, dt):
             k2[i] = item_virtual['velocity_full']
             item_virtual['coords'] = item_real['coords'] + k2[i] * dt * 0.5
 
-    update_segments(Env, Ring, virtualVortex)
+    virtualVortex.update_segments(Env, Ring)
 
     for i in range(N):
         item_real = segments_real[i]
@@ -69,7 +68,7 @@ def rk4_step(Env, Ring, Vortex, dt):
             k3[i] = item_virtual['velocity_full']
             item_virtual['coords'] = item_real['coords'] + k3[i] * dt
 
-    update_segments(Env, Ring, virtualVortex)
+    virtualVortex.update_segments(Env, Ring)
 
     for i in range(N):
         item_real = segments_real[i]

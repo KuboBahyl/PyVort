@@ -1,17 +1,18 @@
-import properties
 from scipy import interpolate
 import numpy as np
 
-def spline3D(segments, item, next_item, type):
+def spline3D(Vortex, item, next_item, type):
     knots = 4
 
     if (type=="nearest"):
-        first_item = properties.go_backward(segments, item)
-        next_next_item = properties.go_forward(segments, next_item)
+        first_item = Vortex.go_backward(item)
+        next_next_item = Vortex.go_forward(next_item)
 
     elif (type=="every_second"):
-        first_item = properties.go_backward(segments, properties.go_backward(segments, item))
-        next_next_item = properties.go_forward(segments, properties.go_forward(segments, next_item))
+        first_item = Vortex.go_backward(
+                        Vortex.go_backward(item))
+        next_next_item = Vortex.go_forward(
+                            Vortex.go_forward(next_item))
 
     coords_to_spline=[first_item['coords'],
                       item['coords'],

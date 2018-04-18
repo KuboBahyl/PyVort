@@ -16,7 +16,6 @@ from tqdm import tqdm
 from config import Config as cf
 from positions import create_coords
 from vortexclass import create_Env, create_Ring, create_Vortex
-from properties import new_segmentation, new_connections, update_segments
 from run import make_step, change_step
 import tests
 
@@ -72,7 +71,7 @@ def main(evolute=True,
 
     # init and filling the missing segment properties
     Env, Ring, Vortex = init()
-    update_segments(Env, Ring, Vortex)
+    Vortex.update_segments(Env, Ring)
 
     # setting up collectors
     dynamic_list = np.zeros(cf.epochs)
@@ -136,16 +135,17 @@ def main(evolute=True,
             make_step(Env, Ring, Vortex, cf.dt, cf.method)
 
             # RE-CONNECT
-            new_connections(Vortex)
+            Vortex.update_connections()
 
             # RE-SEGMENT
-            new_segmentation(Vortex, cf.min_seg_distance, cf.max_seg_distance)
+            Vortex.update_segmentation(min_dist=cf.min_seg_distance,
+                                       max_dist=cf.max_seg_distance)
 
             # KILL IF TOO BIG CIRCUMFERENCE ERROR
             tests.kill_if_length_error(Ring, Vortex)
 
             # UPDATE SEGMENT PROPS
-            update_segments(Env, Ring, Vortex)
+            Vortex.update_segments(Env, Ring)
 
         if cf.plot_segments:
             plt.show()
