@@ -37,7 +37,7 @@ class create_Vortex(object):
     def __init__(self, coords):
         self.active_segments = len(coords)
         self.segments = np.array([
-                {'active' : True,
+                {'is_active' : True,
                  'coords' : coords[i],
                  'backward' : i-1,
                  'forward' : i+1,
@@ -74,4 +74,4 @@ class create_Vortex(object):
         ind = ["x", "y", "z"].index(axis)
         return [item['coords'][ind]
                 for item in self.segments
-                if item['active'] == True]
+                if item['is_active'] == True]

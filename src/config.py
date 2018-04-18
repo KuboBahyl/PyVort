@@ -1,7 +1,7 @@
 class Config:
     # Environment parameters
-    temp_zero = False
-    if not temp_zero:
+    is_temp_zero = False
+    if not is_temp_zero:
         temperature = 1.5 # K
 
     velocity_normal_ext = [0,0,0] # no source
@@ -19,8 +19,8 @@ class Config:
     epochs = 10
     dt=0.01 # starting
     method = "RK4" # or "euler"
-    BIOT = False
-    LIA_updated = True
+    use_BIOT = False
+    use_LIA_updated = True
 
     # Hyper-parameters
     length_max_error = 0.01 # in percents

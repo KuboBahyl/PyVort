@@ -46,7 +46,7 @@ def rk4_step(Env, Ring, Vortex, dt):
 
     for i in range(N):
         item_real = segments_real[i]
-        if item_real['active']:
+        if item_real['is_active']:
             item_virtual = segments_virtual[i]
             k1[i] = item_real['velocity_full']
             item_virtual['coords'] = item_real['coords'] + k1[i] * dt * 0.5
@@ -55,7 +55,7 @@ def rk4_step(Env, Ring, Vortex, dt):
 
     for i in range(N):
         item_real = segments_real[i]
-        if item_real['active']:
+        if item_real['is_active']:
             item_virtual = segments_virtual[i]
             k2[i] = item_virtual['velocity_full']
             item_virtual['coords'] = item_real['coords'] + k2[i] * dt * 0.5
@@ -64,7 +64,7 @@ def rk4_step(Env, Ring, Vortex, dt):
 
     for i in range(N):
         item_real = segments_real[i]
-        if item_real['active']:
+        if item_real['is_active']:
             item_virtual = segments_virtual[i]
             k3[i] = item_virtual['velocity_full']
             item_virtual['coords'] = item_real['coords'] + k3[i] * dt
@@ -73,7 +73,7 @@ def rk4_step(Env, Ring, Vortex, dt):
 
     for i in range(N):
         item_real = segments_real[i]
-        if item_real['active']:
+        if item_real['is_active']:
             item_virtual = segments_virtual[i]
             k4[i] = item_virtual['velocity_full']
             item_real['coords'] += (1/6) * (k1[i] + 2*k2[i] + 2*k3[i] + k4[i]) * dt

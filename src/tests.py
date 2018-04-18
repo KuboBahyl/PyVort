@@ -15,7 +15,7 @@ def calc_length_stat(Vortex, segdists=False):
     segmax = 0
 
     for item in Vortex.segments:
-        if item['active']:
+        if item['is_active']:
             nextItem = Vortex.segments[item['forward']]
             segdist = np.linalg.norm(item['coords'] - nextItem['coords'])
             segdist = np.linalg.norm(item['coords'] - nextItem['coords'])
