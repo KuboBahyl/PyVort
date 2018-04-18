@@ -8,13 +8,15 @@ class Config:
     velocity_super_ext = [0,0,0] # no source
 
     # Vortex ring parameters
-    center = [0,0,0] # um
-    radius = 1000 # um
-    direction = "x"
+    is_ring = True # don't change
+    if is_ring:
+        center = [0,0,0] # um
+        radius = 1000 # um
+        direction = "x"
 
     # Simulation parameters
     resolution = 60 # um
-    epochs = 100
+    epochs = 10
     dt=0.01 # starting
     method = "RK4" # or "euler"
     BIOT = False
@@ -29,7 +31,7 @@ class Config:
 
     # Output parameters
     plot_segments = True
-    plot_segments_title = "Example of vortex re-segmentation"
+    plot_segments_title = "Example of vortex"
     plot_segments_save = False
     if plot_segments_save:
         plot_segments_filename = "resegmentation"
@@ -37,4 +39,4 @@ class Config:
     log_info = True
 
     plot_num = 10
-    log_num = epochs/10
+    log_num = 10

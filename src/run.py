@@ -9,35 +9,34 @@ import numpy as np
 import copy as cp
 from properties import update_segments
 
-def change_step(vortex, dt, max_shift):
-    max_shift /= 10**4
-    next_step = vortex.velocity * dt
+def change_step(Ring, dt, max_shift):
+    next_step = Ring.velocity * dt
     if (next_step > max_shift):
-        dt = max_shift / vortex.velocity
+        dt = max_shift / Ring.velocity
         return dt
 
     return dt
 
-def make_step(method, vortex, dt):
+def make_step(Env, Ring, Vortex, dt, method):
     if method=="euler":
-        return euler_step(vortex, dt)
+        return euler_step(Vortex, dt)
     elif method=="RK4":
-        return rk4_step(vortex, dt)
+        return rk4_step(Env, Ring, Vortex, dt)
     else:
         raise ValueError('Error in method definition. Use "euler" or "RK4" method')
 
 ###############################################################
 
-def euler_step(vortex, dt):
-    for item in vortex.segments:
+def euler_step(Vortex, dt):
+    for item in Vortex.segments:
         item['coords'] += item['velocity_full'] * dt
 
-def rk4_step(vortex, dt):
-    # making vortex copy
-    virtualVortex = cp.deepcopy(vortex)
+def rk4_step(Env, Ring, Vortex, dt):
+    # making Vortex copy
+    virtualVortex = cp.deepcopy(Vortex)
 
     # real and virtual segments
-    segments_real = vortex.segments
+    segments_real = Vortex.segments
     segments_virtual = virtualVortex.segments
 
     N = len(segments_real)
@@ -52,7 +51,7 @@ def rk4_step(vortex, dt):
             k1[i] = item_real['velocity_full']
             item_virtual['coords'] = item_real['coords'] + k1[i] * dt * 0.5
 
-    update_segments(virtualVortex)
+    update_segments(Env, Ring, virtualVortex)
 
     for i in range(N):
         item_real = segments_real[i]
@@ -61,7 +60,7 @@ def rk4_step(vortex, dt):
             k2[i] = item_virtual['velocity_full']
             item_virtual['coords'] = item_real['coords'] + k2[i] * dt * 0.5
 
-    update_segments(virtualVortex)
+    update_segments(Env, Ring, virtualVortex)
 
     for i in range(N):
         item_real = segments_real[i]
@@ -70,7 +69,7 @@ def rk4_step(vortex, dt):
             k3[i] = item_virtual['velocity_full']
             item_virtual['coords'] = item_real['coords'] + k3[i] * dt
 
-    update_segments(virtualVortex)
+    update_segments(Env, Ring, virtualVortex)
 
     for i in range(N):
         item_real = segments_real[i]

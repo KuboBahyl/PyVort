@@ -13,11 +13,28 @@ Vortex class content:
 
 import numpy as np
 
-class Vortex(object):
 
-    def __init__(self, shape, coords):
-        self.shape = shape # TODO refactor
+# environment class - external sources of flow
+class create_Env:
+    def __init__(self, velocity_n_ext, velocity_s_ext):
+        self.vel_n = np.array(velocity_n_ext)
+        self.vel_s = np.array(velocity_s_ext)
+
+    def evolute():
+        # function how should external sources change in time
+        pass
+
+# vortex ring class - init only when simulation is focused on vortex rings
+class create_Ring:
+    def __init__(self, center, radius, direction):
+        self.center = np.array(center)
+        self.radius = radius
+        self.direction = direction
         self.velocity = 0
+
+# tangle o object containing all segmnets
+class create_Vortex(object):
+    def __init__(self, coords):
         self.active_segments = len(coords)
         self.segments = np.array([
                 {'active' : True,
@@ -34,8 +51,9 @@ class Vortex(object):
                 ])
 
         # boundary conditions for ring
-        self.segments[0]['backward'] = self.active_segments - 1
-        self.segments[self.active_segments-1]['forward'] = 0
+        N = self.active_segments
+        self.segments[0]['backward'] = N - 1
+        self.segments[N-1]['forward'] = 0
 
     def __repr__(self):
         return 'Quantum Vortex object. Check documentation for available methods.'
@@ -45,23 +63,15 @@ class Vortex(object):
 ### USER'S OPTIONS
 ######################################
 
+    # get coords of all segments
     def getAllCoords(self, index):
         return [item['coords']
                 for item in self.segments]
 
-    def getAllAxisCoords(self, axis):
-        return [10**4*item['coords'][axis]
+    # get particular axis' coords of all segments
+    # allowed input: "x", "y" or "z"
+    def getAxisCoords(self, axis):
+        ind = ["x", "y", "z"].index(axis)
+        return [item['coords'][ind]
                 for item in self.segments
                 if item['active'] == True]
-
-"""
-Maybe it will be useful later
-
-    def get_index(self, position):
-        if (position >= 0):
-            if self.segments[position]['forward'] == position + 1:
-                return position
-            else:
-                raise Exception('TODO searching in segments')
-        else: raise TypeError('Position should be positive integer')
-"""
