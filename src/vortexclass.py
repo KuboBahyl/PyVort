@@ -16,6 +16,7 @@ from spline3D import spline3D
 import finitediffs
 from config import Config as cf
 import constants as c
+from tests import calc_velocity_ring
 
 kappa = 10**8*c.quantum_vorticity # to um^2/s
 a_core = 10**4*c.core_width # to um
@@ -37,6 +38,7 @@ class create_Ring:
         self.radius = radius
         self.direction = direction
         self.velocity = 0
+        self.velocity_theory = 0
 
 # tangle o object containing all segmnets
 class create_Vortex(object):
@@ -209,6 +211,7 @@ class create_Vortex(object):
         Ring.center = center
         Ring.radius = radius
         Ring.velocity = velocity
+        Ring.velocity_theory = calc_velocity_ring(Env, Ring)
 
     def update_connections(self):
         pass
@@ -249,7 +252,7 @@ class create_Vortex(object):
                     self.add_dumb_segment(coords=new_point,
                                           back=next_item['backward'],
                                           front=item['forward'])
-                                          
+
                     # update indices of new neighbours
                     newitem_index = len(segments) - 1
                     item['forward'] = newitem_index

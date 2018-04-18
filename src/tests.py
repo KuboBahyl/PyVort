@@ -28,7 +28,7 @@ def calc_length_stat(Vortex, segdists=False):
 
     return length
 
-def calc_velocity_ring(Env, Ring, Vortex):
+def calc_velocity_ring(Env, Ring):
     radius = Ring.radius
     v_n = Env.vel_n
     v_s = Env.vel_s
@@ -71,7 +71,7 @@ def print_statistics(Env, Ring, Vortex):
     length_theor = 2 * np.pi * radius
     length_err = calc_error(length_real, length_theor)
 
-    velocity_theor = calc_velocity_ring(Env, Ring, Vortex)
+    velocity_theor = calc_velocity_ring(Env, Ring)
 
     energy = calc_energy_ring(Ring, Vortex)
 

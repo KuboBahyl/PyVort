@@ -106,7 +106,7 @@ def main(evolute=True,
                 if dynamic_quantity_name2 in Vortex.__dict__.keys():
                     dynamic_list2[epoch] = getattr(Vortex, dynamic_quantity_name2)
                 elif dynamic_quantity_name2 in Ring.__dict__.keys():
-                    dynamic_list[epoch] = getattr(Ring, dynamic_quantity_name2)
+                    dynamic_list2[epoch] = getattr(Ring, dynamic_quantity_name2)
                 elif dynamic_quantity_name2 in tests.__dict__.keys():
                      method = getattr(tests, dynamic_quantity_name2)
                      dynamic_list2[epoch] = method(Vortex)
